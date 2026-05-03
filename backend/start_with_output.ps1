@@ -14,7 +14,7 @@ if ($args.Count -gt 1) {
 }
 
 Write-Host "====================================="
-Write-Host "Meetily Backend Startup"
+Write-Host "kernsatz Backend Startup"
 Write-Host "====================================="
 Write-Host "Python Backend Port: $portPython"
 Write-Host "Whisper Server Port: $portWhisper"
@@ -526,7 +526,7 @@ if (-not (Test-Path $modelFile)) {
 }
 
 Write-Host "====================================="
-Write-Host "Starting Meetily Backend"
+Write-Host "Starting kernsatz Backend"
 Write-Host "====================================="
 Write-Host "Model: $modelName"
 Write-Host "Python Backend Port: $portPython"
@@ -702,17 +702,17 @@ Write-Host "====================================="
 Write-Host "Frontend Application Check"
 Write-Host "====================================="
 
-# Check if meetily-frontend is installed
+# Check if kernsatz-frontend is installed
 $frontendInstalled = $false
 $frontendPath = $null
 
-# Check common installation paths for meetily-frontend
+# Check common installation paths for kernsatz-frontend
 $possiblePaths = @(
-    "$env:LOCALAPPDATA\Programs\meetily-frontend\meetily-frontend.exe",
-    "$env:LOCALAPPDATA\Programs\meetily\meetily-frontend.exe",
-    "$env:ProgramFiles\meetily-frontend\meetily-frontend.exe",
-    "${env:ProgramFiles(x86)}\meetily-frontend\meetily-frontend.exe",
-    "$env:APPDATA\meetily-frontend\meetily-frontend.exe"
+    "$env:LOCALAPPDATA\Programs\kernsatz-frontend\kernsatz-frontend.exe",
+    "$env:LOCALAPPDATA\Programs\kernsatz\kernsatz-frontend.exe",
+    "$env:ProgramFiles\kernsatz-frontend\kernsatz-frontend.exe",
+    "${env:ProgramFiles(x86)}\kernsatz-frontend\kernsatz-frontend.exe",
+    "$env:APPDATA\kernsatz-frontend\kernsatz-frontend.exe"
 )
 
 foreach ($path in $possiblePaths) {
@@ -723,13 +723,13 @@ foreach ($path in $possiblePaths) {
     }
 }
 
-# Also check if meetily is in the registry (properly installed)
+# Also check if kernsatz is in the registry (properly installed)
 try {
     $regPath = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue | 
-               Where-Object { $_.DisplayName -like "*meetily*" }
+               Where-Object { $_.DisplayName -like "*kernsatz*" }
     if (-not $regPath) {
         $regPath = Get-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue | 
-                   Where-Object { $_.DisplayName -like "*meetily*" }
+                   Where-Object { $_.DisplayName -like "*kernsatz*" }
     }
     if ($regPath) {
         $frontendInstalled = $true
@@ -738,7 +738,7 @@ try {
             $installLocation = $regPath.InstallLocation -replace '^"(.+)"$', '$1'
             
             # Try to find the executable in the install location
-            $possibleExeNames = @("meetily-frontend.exe", "meetily.exe")
+            $possibleExeNames = @("kernsatz-frontend.exe", "kernsatz.exe")
             foreach ($exeName in $possibleExeNames) {
                 $testPath = Join-Path $installLocation $exeName
                 if (Test-Path $testPath) {
@@ -753,22 +753,22 @@ try {
 }
 
 if ($frontendInstalled) {
-    Write-Host "Meetily frontend application is installed."
+    Write-Host "kernsatz frontend application is installed."
     if ($frontendPath) {
         Write-Host "Location: $frontendPath"
         
         # Ask if user wants to launch the frontend
-        $launchFrontend = Read-Host "Do you want to launch the Meetily frontend application? (Y/N)"
+        $launchFrontend = Read-Host "Do you want to launch the kernsatz frontend application? (Y/N)"
         if ($launchFrontend -eq 'Y' -or $launchFrontend -eq 'y') {
-            Write-Host "Launching Meetily frontend..."
+            Write-Host "Launching kernsatz frontend..."
             Start-Process -FilePath $frontendPath
-            Write-Host "Meetily frontend launched successfully."
+            Write-Host "kernsatz frontend launched successfully."
         }
     }
 } else {
-    Write-Host "Meetily frontend application is not installed."
+    Write-Host "kernsatz frontend application is not installed."
     Write-Host ""
-    $installFrontend = Read-Host "Would you like to download and install the Meetily frontend application? (Y/N)"
+    $installFrontend = Read-Host "Would you like to download and install the kernsatz frontend application? (Y/N)"
     
     if ($installFrontend -eq 'Y' -or $installFrontend -eq 'y') {
         Write-Host "Fetching latest release information..."
@@ -823,11 +823,11 @@ if ($frontendInstalled) {
                 if ($installerProcess.ExitCode -eq 0) {
                     Write-Host "Installation completed successfully!"
                     
-                    # Check if meetily is now installed and launch it
+                    # Check if kernsatz is now installed and launch it
                     Start-Sleep -Seconds 2  # Give the system a moment to register the installation
                     foreach ($path in $possiblePaths) {
                         if (Test-Path $path) {
-                            Write-Host "Launching Meetily frontend..."
+                            Write-Host "Launching kernsatz frontend..."
                             Start-Process -FilePath $path
                             break
                         }

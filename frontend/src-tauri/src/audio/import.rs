@@ -39,7 +39,7 @@ impl ImportGuard {
             .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
             .is_err()
         {
-            return Err("Import already in progress".to_string());
+            return Err("Import läuft bereits".to_string());
         }
         Ok(ImportGuard)
     }
@@ -331,11 +331,11 @@ async fn run_import<R: Runtime>(
     // Determine which provider to use (default to whisper)
     let use_parakeet = provider.as_deref() == Some("parakeet");
 
-    emit_progress(&app, "copying", 5, "Creating meeting folder...");
+    emit_progress(&app, "copying", 5, "Meeting-Ordner wird erstellt...");
 
     // Check for cancellation
     if IMPORT_CANCELLED.load(Ordering::SeqCst) {
-        return Err(anyhow!("Import cancelled"));
+        return Err(anyhow!("Import abgebrochen"));
     }
 
     // Create meeting folder
@@ -343,7 +343,7 @@ async fn run_import<R: Runtime>(
     let meeting_folder = create_meeting_folder(&base_folder, &title, false)?;
 
     // Copy audio file to meeting folder
-    emit_progress(&app, "copying", 10, "Copying audio file...");
+    emit_progress(&app, "copying", 10, "Audiodatei wird kopiert...");
 
     let dest_filename = format!(
         "audio.{}",
@@ -367,10 +367,10 @@ async fn run_import<R: Runtime>(
     if IMPORT_CANCELLED.load(Ordering::SeqCst) {
         // Cleanup: remove the meeting folder
         let _ = std::fs::remove_dir_all(&meeting_folder);
-        return Err(anyhow!("Import cancelled"));
+        return Err(anyhow!("Import abgebrochen"));
     }
 
-    emit_progress(&app, "decoding", 15, "Decoding audio file...");
+    emit_progress(&app, "decoding", 15, "Audiodatei wird dekodiert...");
 
     // Decode the audio file with progress updates
     let app_for_decode = app.clone();
@@ -393,12 +393,12 @@ async fn run_import<R: Runtime>(
         duration_seconds, decoded.sample_rate, decoded.channels
     );
 
-    emit_progress(&app, "resampling", 20, "Converting audio format...");
+    emit_progress(&app, "resampling", 20, "Audioformat wird konvertiert...");
 
     // Check for cancellation
     if IMPORT_CANCELLED.load(Ordering::SeqCst) {
         let _ = std::fs::remove_dir_all(&meeting_folder);
-        return Err(anyhow!("Import cancelled"));
+        return Err(anyhow!("Import abgebrochen"));
     }
 
     // Convert to 16kHz mono format with progress updates
@@ -419,12 +419,12 @@ async fn run_import<R: Runtime>(
         audio_samples.len()
     );
 
-    emit_progress(&app, "vad", 25, "Detecting speech segments...");
+    emit_progress(&app, "vad", 25, "Sprachsegmente werden erkannt...");
 
     // Check for cancellation
     if IMPORT_CANCELLED.load(Ordering::SeqCst) {
         let _ = std::fs::remove_dir_all(&meeting_folder);
-        return Err(anyhow!("Import cancelled"));
+        return Err(anyhow!("Import abgebrochen"));
     }
 
     // Use VAD to find speech segments
@@ -441,7 +441,7 @@ async fn run_import<R: Runtime>(
                     "vad",
                     overall_progress,
                     &format!(
-                        "Detecting speech segments... {}% ({} found)",
+                        "Sprachsegmente werden erkannt... {}% ({} gefunden)",
                         vad_progress, segments_found
                     ),
                 );
@@ -489,10 +489,10 @@ async fn run_import<R: Runtime>(
         let _ = app.emit(
             "import-warning",
             ImportWarning {
-                warning: "No speech detected in audio file".to_string(),
+                warning: "Keine Sprache in der Audiodatei erkannt".to_string(),
                 details: Some(
-                    "The file was imported successfully, but VAD did not detect any speech. \
-                     The meeting was created but contains no transcripts.".to_string()
+                    "Die Datei wurde erfolgreich importiert, aber es wurde keine Sprache erkannt. \
+                     Das Meeting wurde erstellt, enthält jedoch keine Transkripte.".to_string()
                 ),
             },
         );
@@ -502,10 +502,10 @@ async fn run_import<R: Runtime>(
     // Check for cancellation
     if IMPORT_CANCELLED.load(Ordering::SeqCst) {
         let _ = std::fs::remove_dir_all(&meeting_folder);
-        return Err(anyhow!("Import cancelled"));
+        return Err(anyhow!("Import abgebrochen"));
     }
 
-    emit_progress(&app, "transcribing", 30, "Loading transcription engine...");
+    emit_progress(&app, "transcribing", 30, "Transkriptions-Engine wird geladen...");
 
     // Initialize the appropriate engine
     let whisper_engine = if !use_parakeet && total_segments > 0 {
@@ -551,7 +551,7 @@ async fn run_import<R: Runtime>(
     for (i, segment) in processable_segments.iter().enumerate() {
         if IMPORT_CANCELLED.load(Ordering::SeqCst) {
             let _ = std::fs::remove_dir_all(&meeting_folder);
-            return Err(anyhow!("Import cancelled"));
+            return Err(anyhow!("Import abgebrochen"));
         }
 
         let progress = 30 + ((i as f32 / processable_count.max(1) as f32) * 50.0) as u32;
@@ -561,7 +561,7 @@ async fn run_import<R: Runtime>(
             "transcribing",
             progress,
             &format!(
-                "Transcribing segment {} of {} ({:.1}s)...",
+                "Transkribiere Segment {} von {} ({:.1}s)...",
                 i + 1,
                 processable_count,
                 segment_duration_sec
@@ -624,10 +624,10 @@ async fn run_import<R: Runtime>(
     // Check for cancellation
     if IMPORT_CANCELLED.load(Ordering::SeqCst) {
         let _ = std::fs::remove_dir_all(&meeting_folder);
-        return Err(anyhow!("Import cancelled"));
+        return Err(anyhow!("Import abgebrochen"));
     }
 
-    emit_progress(&app, "saving", 85, "Creating meeting...");
+    emit_progress(&app, "saving", 85, "Meeting wird erstellt...");
 
     // Create transcript segments
     let segments = create_transcript_segments(&all_transcripts);
@@ -646,7 +646,7 @@ async fn run_import<R: Runtime>(
     .await?;
 
     // Write transcripts.json and metadata.json to the meeting folder
-    emit_progress(&app, "saving", 90, "Writing transcript files...");
+    emit_progress(&app, "saving", 90, "Transkriptdateien werden geschrieben...");
 
     if let Err(e) = write_transcripts_json(&meeting_folder, &segments) {
         warn!("Failed to write transcripts.json: {}", e);
@@ -663,7 +663,7 @@ async fn run_import<R: Runtime>(
         warn!("Failed to write metadata.json: {}", e);
     }
 
-    emit_progress(&app, "complete", 100, "Import complete");
+    emit_progress(&app, "complete", 100, "Import abgeschlossen");
 
     Ok(ImportResult {
         meeting_id,

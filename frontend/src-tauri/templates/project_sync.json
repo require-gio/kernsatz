@@ -1,51 +1,51 @@
 {
-  "name": "Project Sync / Status Update",
-  "description": "Weekly or bi-weekly project status meeting focusing on milestones and risks.",
+  "name": "Projekt-Sync / Status-Update",
+  "description": "Wöchentliches oder zweiwöchentliches Projektstatus-Meeting mit Fokus auf Meilensteine und Risiken.",
   "sections": [
     {
-      "title": "Meeting Date & Time",
-      "instruction": "Date, start/end time, facilitator name",
+      "title": "Datum & Uhrzeit",
+      "instruction": "Datum, Start-/Endzeit, Name der Moderation",
       "format": "string"
     },
     {
-      "title": "Attendees",
-      "instruction": "List attendees and their roles",
+      "title": "Teilnehmer",
+      "instruction": "Liste der Teilnehmer und ihrer Rollen",
       "format": "list"
     },
     {
-      "title": "Milestones & Status",
-      "instruction": "Current milestones with status and estimated completion date",
+      "title": "Meilensteine & Status",
+      "instruction": "Aktuelle Meilensteine mit Status und voraussichtlichem Abschlussdatum",
       "format": "list",
-      "item_format": "| **Milestone** | **Status** | **ETA** |\n| --- | --- | --- |"
+      "item_format": "| **Meilenstein** | **Status** | **Fertigstellung** |\n| --- | --- | --- |"
     },
     {
-      "title": "Progress Summary",
-      "instruction": "Short paragraph summarizing progress since last sync meeting",
+      "title": "Zusammenfassung des Fortschritts",
+      "instruction": "Kurzer Absatz, der den Fortschritt seit dem letzten Sync-Meeting zusammenfasst",
       "format": "paragraph"
     },
     {
-      "title": "Top Risks & Mitigations",
-      "instruction": "List top risks with impact level, mitigation plan, and owner",
+      "title": "Größte Risiken & Maßnahmen",
+      "instruction": "Liste der größten Risiken mit Auswirkungsgrad, Minderungsplan und Verantwortlichem",
       "format": "list",
-      "item_format": "| **Risk** | **Impact** | **Mitigation** | **Owner** |\n| --- | --- | --- | --- |"
+      "item_format": "| **Risiko** | **Auswirkung** | **Maßnahme** | **Verantwortlich** |\n| --- | --- | --- | --- |"
     },
     {
-      "title": "Key Decisions",
-      "instruction": "Decisions made in this meeting with rationale and timestamp",
+      "title": "Wichtige Entscheidungen",
+      "instruction": "In diesem Meeting getroffene Entscheidungen mit Begründung und Zeitstempel",
       "format": "list",
-      "item_format": "| **Decision** | **Rationale** | **Timestamp** |\n| --- | --- | --- |"
+      "item_format": "| **Entscheidung** | **Begründung** | **Zeitstempel** |\n| --- | --- | --- |"
     },
     {
-      "title": "Action Items",
-      "instruction": "Tasks with owners, due dates, priority, and status",
+      "title": "Aktionspunkte",
+      "instruction": "Aufgaben mit Verantwortlichen, Fälligkeitsdatum, Priorität und Status",
       "format": "list",
-      "item_format": "| **Owner** | **Task** | **Due Date** | **Priority** | **Status** |\n| --- | --- | --- | --- | --- |"
+      "item_format": "| **Verantwortlich** | **Aufgabe** | **Fälligkeit** | **Priorität** | **Status** |\n| --- | --- | --- | --- | --- |"
     },
     {
-      "title": "Related Documents",
-      "instruction": "Links to relevant documents, tickets, or designs discussed",
+      "title": "Zugehörige Dokumente",
+      "instruction": "Links zu relevanten Dokumenten, Tickets oder Designs, die besprochen wurden",
       "format": "list",
-      "item_format": "| **Document Title** | **URL** | **Type** |\n| --- | --- | --- |"
+      "item_format": "| **Dokumententitel** | **URL** | **Typ** |\n| --- | --- | --- |"
     }
   ]
 }

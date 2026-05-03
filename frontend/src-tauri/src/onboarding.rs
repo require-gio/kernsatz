@@ -20,7 +20,7 @@ pub struct OnboardingStatus {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ModelStatus {
     pub parakeet: String,  // "downloaded" | "not_downloaded" | "downloading"
-    pub summary: String,   // Generic field for summary model (gemma3:1b or gemma3:4b)
+    pub summary: String,   // Generic field for summary model (ministral:3b or gemma3:1b)
 }
 
 impl Default for OnboardingStatus {
@@ -131,12 +131,12 @@ pub async fn get_onboarding_status<R: Runtime>(
 ) -> Result<Option<OnboardingStatus>, String> {
     let status = load_onboarding_status(&app)
         .await
-        .map_err(|e| format!("Failed to load onboarding status: {}", e))?;
+        .map_err(|e| format!("Onboarding-Status konnte nicht geladen werden: {}", e))?;
 
     // Return None if it's the default (never saved before)
     // Check if we have any saved data by seeing if the store has the key
     let store = app.store("onboarding-status.json")
-        .map_err(|e| format!("Failed to access store: {}", e))?;
+        .map_err(|e| format!("Store konnte nicht zugegriffen werden: {}", e))?;
 
     if store.get("status").is_none() {
         Ok(None)
@@ -152,7 +152,7 @@ pub async fn save_onboarding_status_cmd<R: Runtime>(
 ) -> Result<(), String> {
     save_onboarding_status(&app, &status)
         .await
-        .map_err(|e| format!("Failed to save onboarding status: {}", e))
+        .map_err(|e| format!("Onboarding-Status konnte nicht gespeichert werden: {}", e))
 }
 
 #[tauri::command]
@@ -161,7 +161,7 @@ pub async fn reset_onboarding_status_cmd<R: Runtime>(
 ) -> Result<(), String> {
     reset_onboarding_status(&app)
         .await
-        .map_err(|e| format!("Failed to reset onboarding status: {}", e))
+        .map_err(|e| format!("Onboarding-Status konnte nicht zurückgesetzt werden: {}", e))
 }
 
 #[tauri::command]
@@ -184,7 +184,7 @@ pub async fn complete_onboarding<R: Runtime>(
         None,
     ).await {
         error!("Failed to save builtin-ai model config: {}", e);
-        return Err(format!("Failed to save builtin-ai model config: {}", e));
+        return Err(format!("Integrierte KI-Modellkonfiguration konnte nicht gespeichert werden: {}", e));
     }
     info!("Saved builtin-ai model config: model={}", model);
 
@@ -195,14 +195,14 @@ pub async fn complete_onboarding<R: Runtime>(
         crate::config::DEFAULT_PARAKEET_MODEL,
     ).await {
         error!("Failed to save transcription model config: {}", e);
-        return Err(format!("Failed to save transcription model config: {}", e));
+        return Err(format!("Transkriptionsmodell-Konfiguration konnte nicht gespeichert werden: {}", e));
     }
     info!("Saved transcription model config: provider=parakeet, model={}", crate::config::DEFAULT_PARAKEET_MODEL);
 
     // Step 2: Only NOW mark onboarding as complete (after DB operations succeed)
     let mut status = load_onboarding_status(&app)
         .await
-        .map_err(|e| format!("Failed to load onboarding status: {}", e))?;
+        .map_err(|e| format!("Onboarding-Status konnte nicht geladen werden: {}", e))?;
 
     status.completed = true;
     status.current_step = 4; // Max step (4 on macOS with permissions, 3 on other platforms)
@@ -211,7 +211,7 @@ pub async fn complete_onboarding<R: Runtime>(
 
     save_onboarding_status(&app, &status)
         .await
-        .map_err(|e| format!("Failed to save completed onboarding status: {}", e))?;
+        .map_err(|e| format!("Abgeschlossener Onboarding-Status konnte nicht gespeichert werden: {}", e))?;
 
     info!("Onboarding completed successfully with model: {}", model);
     Ok(())

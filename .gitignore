@@ -18,6 +18,8 @@
 /coverage
 /dist
 
+documents/
+
 # next.js
 /.next/
 /out/

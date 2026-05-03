@@ -622,7 +622,7 @@ export const AISummary = ({ summary, status, error, onSummaryChange, onRegenerat
         <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
         <div>
           <h3 className="text-blue-700 font-medium">
-            {status === 'processing' ? 'Processing Transcript' : 'Generating Summary'}
+            {status === 'processing' ? 'Processing Transcript' : 'Erstelle Zusammenfassung'}
           </h3>
           <p className="text-blue-600 text-sm">
             {status === 'processing' 

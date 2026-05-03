@@ -38,7 +38,7 @@ pub async fn get_notification_settings(
     if let Some(manager) = manager_lock.as_ref() {
         Ok(manager.get_settings().await)
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -53,9 +53,9 @@ pub async fn set_notification_settings(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.update_settings(settings).await
-            .map_err(|e| format!("Failed to update settings: {}", e))
+            .map_err(|e| format!("Einstellungen konnten nicht aktualisiert werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -69,9 +69,9 @@ pub async fn request_notification_permission(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.request_permission().await
-            .map_err(|e| format!("Failed to request permission: {}", e))
+            .map_err(|e| format!("Berechtigung konnte nicht angefordert werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -86,9 +86,9 @@ pub async fn show_notification(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.show_notification(notification).await
-            .map_err(|e| format!("Failed to show notification: {}", e))
+            .map_err(|e| format!("Benachrichtigung konnte nicht angezeigt werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -102,9 +102,9 @@ pub async fn show_test_notification(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.show_test_notification().await
-            .map_err(|e| format!("Failed to show test notification: {}", e))
+            .map_err(|e| format!("Testbenachrichtigung konnte nicht angezeigt werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -117,7 +117,7 @@ pub async fn is_dnd_active(
     if let Some(manager) = manager_lock.as_ref() {
         Ok(manager.is_dnd_active().await)
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -130,7 +130,7 @@ pub async fn get_system_dnd_status(
     if let Some(manager) = manager_lock.as_ref() {
         Ok(manager.get_system_dnd_status().await)
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -145,9 +145,9 @@ pub async fn set_manual_dnd(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.set_manual_dnd(enabled).await
-            .map_err(|e| format!("Failed to set manual DND: {}", e))
+            .map_err(|e| format!("Bitte-nicht-stören konnte nicht gesetzt werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -162,9 +162,9 @@ pub async fn set_notification_consent(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.set_consent(consent).await
-            .map_err(|e| format!("Failed to set consent: {}", e))
+            .map_err(|e| format!("Zustimmung konnte nicht gesetzt werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -178,9 +178,9 @@ pub async fn clear_notifications(
     let manager_lock = manager_state.read().await;
     if let Some(manager) = manager_lock.as_ref() {
         manager.clear_notifications().await
-            .map_err(|e| format!("Failed to clear notifications: {}", e))
+            .map_err(|e| format!("Benachrichtigungen konnten nicht gelöscht werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -221,7 +221,7 @@ pub async fn initialize_notification_manager_manual(
         }
         Err(e) => {
             log_error!("Failed to initialize notification manager manually: {}", e);
-            Err(format!("Failed to initialize notification manager: {}", e))
+            Err(format!("Benachrichtigungsmanager konnte nicht initialisiert werden: {}", e))
         }
     }
 }
@@ -239,7 +239,7 @@ pub async fn test_notification_with_auto_consent(
     if manager_lock.is_none() {
         drop(manager_lock);
         if let Err(e) = initialize_notification_manager_manual(app.clone(), manager_state.clone()).await {
-            return Err(format!("Failed to initialize manager: {}", e));
+            return Err(format!("Manager konnte nicht initialisiert werden: {}", e));
         }
     } else {
         drop(manager_lock);
@@ -258,9 +258,9 @@ pub async fn test_notification_with_auto_consent(
 
         // Show test notification
         manager.show_test_notification().await
-            .map_err(|e| format!("Failed to show test notification: {}", e))
+            .map_err(|e| format!("Testbenachrichtigung konnte nicht angezeigt werden: {}", e))
     } else {
-        Err("Manager still not initialized".to_string())
+        Err("Manager immer noch nicht initialisiert".to_string())
     }
 }
 
@@ -273,9 +273,9 @@ pub async fn get_notification_stats(
     if let Some(manager) = manager_lock.as_ref() {
         let stats = manager.get_stats().await;
         serde_json::to_value(stats)
-            .map_err(|e| format!("Failed to serialize stats: {}", e))
+            .map_err(|e| format!("Statistiken konnten nicht serialisiert werden: {}", e))
     } else {
-        Err("Notification manager not initialized".to_string())
+        Err("Benachrichtigungsmanager nicht initialisiert".to_string())
     }
 }
 
@@ -332,7 +332,7 @@ pub async fn show_recording_started_notification<R: Runtime>(
                 }
 
                 // Fallback: Use Tauri's notification API directly
-                let title = "Meetily";
+                let title = "kernsatz";
                 let body = match meeting_name {
                     Some(name) => format!("Recording started for meeting: {}", name),
                     None => "Recording has started. Please inform others in the meeting that you are recording.".to_string(),
@@ -382,7 +382,7 @@ pub async fn show_recording_stopped_notification<R: Runtime>(
         }
 
         // Use direct Tauri notification as fallback for stop notification
-        let title = "Meetily";
+        let title = "kernsatz";
         let body = "Recording has stopped";
 
         log_info!("Using direct Tauri notification fallback: {} - {}", title, body);

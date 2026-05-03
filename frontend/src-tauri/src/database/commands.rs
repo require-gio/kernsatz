@@ -17,7 +17,7 @@ pub struct DatabaseCheckResult {
 pub async fn check_first_launch(app: AppHandle) -> Result<bool, String> {
     DatabaseManager::is_first_launch(&app)
         .await
-        .map_err(|e| format!("Failed to check first launch: {}", e))
+        .map_err(|e| format!("Erster Start konnte nicht geprüft werden: {}", e))
 }
 
 /// Open a dialog to select a folder or file for legacy database import
@@ -88,7 +88,7 @@ pub async fn check_default_legacy_database(app: AppHandle) -> Result<Option<Stri
     let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+        .map_err(|e| format!("App-Datenverzeichnis konnte nicht abgerufen werden: {}", e))?;
 
     let legacy_db = app_data_dir.join("meeting_minutes.db");
     info!("Checking for default legacy database at: {:?}", legacy_db);
@@ -157,7 +157,7 @@ pub async fn import_and_initialize_database(
         .await
         .map_err(|e| {
             error!("Failed to import legacy database: {}", e);
-            format!("Failed to import database: {}", e)
+            format!("Datenbank konnte nicht importiert werden: {}", e)
         })?;
 
     // Update app state with the new manager
@@ -167,7 +167,7 @@ pub async fn import_and_initialize_database(
 
     // Emit event to notify frontend that database is ready
     app.emit("database-initialized", ())
-        .map_err(|e| format!("Failed to emit database-initialized event: {}", e))?;
+        .map_err(|e| format!("database-initialized-Event konnte nicht ausgelöst werden: {}", e))?;
 
     Ok(())
 }
@@ -181,7 +181,7 @@ pub async fn initialize_fresh_database(app: AppHandle) -> Result<(), String> {
         .await
         .map_err(|e| {
             error!("Failed to initialize fresh database: {}", e);
-            format!("Failed to initialize database: {}", e)
+            format!("Datenbank konnte nicht initialisiert werden: {}", e)
         })?;
 
     // Update app state with the new manager
@@ -194,7 +194,7 @@ pub async fn initialize_fresh_database(app: AppHandle) -> Result<(), String> {
     if let Err(e) = crate::database::repositories::setting::SettingsRepository::save_model_config(
         pool,
         "builtin-ai",
-        "gemma3:1b",
+        crate::summary::summary_engine::DEFAULT_MODEL_NAME,
         "large-v3", // Default whisper model (unused for builtin but required)
         None,
     ).await {
@@ -214,7 +214,7 @@ pub async fn initialize_fresh_database(app: AppHandle) -> Result<(), String> {
 
     // Emit event to notify frontend that database is ready
     app.emit("database-initialized", ())
-        .map_err(|e| format!("Failed to emit database-initialized event: {}", e))?;
+        .map_err(|e| format!("database-initialized-Event konnte nicht ausgelöst werden: {}", e))?;
 
     Ok(())
 }
@@ -225,7 +225,7 @@ pub async fn get_database_directory(app: AppHandle) -> Result<String, String> {
     let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+        .map_err(|e| format!("App-Datenverzeichnis konnte nicht abgerufen werden: {}", e))?;
 
     Ok(app_data_dir.to_string_lossy().to_string())
 }
@@ -236,12 +236,12 @@ pub async fn open_database_folder(app: AppHandle) -> Result<(), String> {
     let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+        .map_err(|e| format!("App-Datenverzeichnis konnte nicht abgerufen werden: {}", e))?;
 
     // Ensure directory exists before trying to open it
     if !app_data_dir.exists() {
         std::fs::create_dir_all(&app_data_dir)
-            .map_err(|e| format!("Failed to create directory: {}", e))?;
+            .map_err(|e| format!("Verzeichnis konnte nicht erstellt werden: {}", e))?;
     }
 
     let folder_path = app_data_dir.to_string_lossy().to_string();
@@ -251,7 +251,7 @@ pub async fn open_database_folder(app: AppHandle) -> Result<(), String> {
         std::process::Command::new("explorer")
             .arg(&folder_path)
             .spawn()
-            .map_err(|e| format!("Failed to open folder: {}", e))?;
+            .map_err(|e| format!("Ordner konnte nicht geöffnet werden: {}", e))?;
     }
 
     #[cfg(target_os = "macos")]
@@ -259,7 +259,7 @@ pub async fn open_database_folder(app: AppHandle) -> Result<(), String> {
         std::process::Command::new("open")
             .arg(&folder_path)
             .spawn()
-            .map_err(|e| format!("Failed to open folder: {}", e))?;
+            .map_err(|e| format!("Ordner konnte nicht geöffnet werden: {}", e))?;
     }
 
     #[cfg(target_os = "linux")]
@@ -267,7 +267,7 @@ pub async fn open_database_folder(app: AppHandle) -> Result<(), String> {
         std::process::Command::new("xdg-open")
             .arg(&folder_path)
             .spawn()
-            .map_err(|e| format!("Failed to open folder: {}", e))?;
+            .map_err(|e| format!("Ordner konnte nicht geöffnet werden: {}", e))?;
     }
 
     info!("Opened database folder: {}", folder_path);

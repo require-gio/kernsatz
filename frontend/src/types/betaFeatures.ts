@@ -19,7 +19,7 @@
 export interface BetaFeatures {
   /**
    * Import audio files and retranscribe existing meetings with different language settings
-   * @since v0.3.0
+   * @since v1.0.0
    */
   importAndRetranscribe: boolean;
 }

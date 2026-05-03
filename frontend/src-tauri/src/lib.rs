@@ -96,7 +96,7 @@ async fn start_recording<R: Runtime>(
     );
 
     if is_recording().await {
-        return Err("Recording already in progress".to_string());
+        return Err("Aufnahme läuft bereits".to_string());
     }
 
     // Call the actual audio recording system with meeting name
@@ -136,7 +136,7 @@ async fn start_recording<R: Runtime>(
         }
         Err(e) => {
             log_error!("Failed to start audio recording: {}", e);
-            Err(format!("Failed to start recording: {}", e))
+            Err(format!("Aufnahme konnte nicht gestartet werden: {}", e))
         }
     }
 }
@@ -169,7 +169,7 @@ async fn stop_recording<R: Runtime>(app: AppHandle<R>, args: RecordingArgs) -> R
                 if !parent.exists() {
                     log_info!("Creating directory: {:?}", parent);
                     if let Err(e) = std::fs::create_dir_all(parent) {
-                        let err_msg = format!("Failed to create save directory: {}", e);
+                        let err_msg = format!("Speicherverzeichnis konnte nicht erstellt werden: {}", e);
                         log_error!("{}", err_msg);
                         return Err(err_msg);
                     }
@@ -200,7 +200,7 @@ async fn stop_recording<R: Runtime>(app: AppHandle<R>, args: RecordingArgs) -> R
             // Still update the flag even if stopping failed
             RECORDING_FLAG.store(false, Ordering::SeqCst);
             tray::update_tray_menu(&app);
-            Err(format!("Failed to stop recording: {}", e))
+            Err(format!("Aufnahme konnte nicht gestoppt werden: {}", e))
         }
     }
 }
@@ -223,7 +223,7 @@ fn get_transcription_status() -> TranscriptionStatus {
 fn read_audio_file(file_path: String) -> Result<Vec<u8>, String> {
     match std::fs::read(&file_path) {
         Ok(data) => Ok(data),
-        Err(e) => Err(format!("Failed to read audio file: {}", e)),
+        Err(e) => Err(format!("Audiodatei konnte nicht gelesen werden: {}", e)),
     }
 }
 
@@ -235,13 +235,13 @@ async fn save_transcript(file_path: String, content: String) -> Result<(), Strin
     if let Some(parent) = std::path::Path::new(&file_path).parent() {
         if !parent.exists() {
             std::fs::create_dir_all(parent)
-                .map_err(|e| format!("Failed to create directory: {}", e))?;
+                .map_err(|e| format!("Verzeichnis konnte nicht erstellt werden: {}", e))?;
         }
     }
 
     // Write content to file
     std::fs::write(&file_path, content)
-        .map_err(|e| format!("Failed to write transcript: {}", e))?;
+        .map_err(|e| format!("Transkript konnte nicht geschrieben werden: {}", e))?;
 
     log_info!("Transcript saved successfully");
     Ok(())
@@ -260,7 +260,7 @@ async fn start_audio_level_monitoring<R: Runtime>(
 
     audio::simple_level_monitor::start_monitoring(app, device_names)
         .await
-        .map_err(|e| format!("Failed to start audio level monitoring: {}", e))
+        .map_err(|e| format!("Audio-Pegelanzeige konnte nicht gestartet werden: {}", e))
 }
 
 #[tauri::command]
@@ -269,7 +269,7 @@ async fn stop_audio_level_monitoring() -> Result<(), String> {
 
     audio::simple_level_monitor::stop_monitoring()
         .await
-        .map_err(|e| format!("Failed to stop audio level monitoring: {}", e))
+        .map_err(|e| format!("Audio-Pegelanzeige konnte nicht gestoppt werden: {}", e))
 }
 
 #[tauri::command]
@@ -285,13 +285,13 @@ async fn is_audio_level_monitoring() -> bool {
 async fn get_audio_devices() -> Result<Vec<AudioDevice>, String> {
     list_audio_devices()
         .await
-        .map_err(|e| format!("Failed to list audio devices: {}", e))
+        .map_err(|e| format!("Audiogeräte konnten nicht aufgelistet werden: {}", e))
 }
 
 #[tauri::command]
 async fn trigger_microphone_permission() -> Result<bool, String> {
     trigger_audio_permission()
-        .map_err(|e| format!("Failed to trigger microphone permission: {}", e))
+        .map_err(|e| format!("Mikrofonberechtigung konnte nicht angefordert werden: {}", e))
 }
 
 #[tauri::command]
@@ -376,7 +376,7 @@ async fn start_recording_with_devices_and_meeting<R: Runtime>(
 async fn set_language_preference(language: String) -> Result<(), String> {
     let mut lang_pref = LANGUAGE_PREFERENCE
         .lock()
-        .map_err(|e| format!("Failed to set language preference: {}", e))?;
+        .map_err(|e| format!("Spracheinstellung konnte nicht gesetzt werden: {}", e))?;
     log_info!("Setting language preference to: {}", language);
     *lang_pref = language;
     Ok(())

@@ -799,11 +799,11 @@ pub async fn api_get_meeting<R: Runtime>(
         }
         Ok(None) => {
             log_warn!("Meeting not found: {}", meeting_id);
-            Err(format!("Meeting not found: {}", meeting_id))
+            Err(format!("Meeting nicht gefunden: {}", meeting_id))
         }
         Err(e) => {
             log_error!("Error retrieving meeting {}: {}", meeting_id, e);
-            Err(format!("Failed to retrieve meeting: {}", e))
+            Err(format!("Meeting konnte nicht abgerufen werden: {}", e))
         }
     }
 }
@@ -832,11 +832,11 @@ pub async fn api_get_meeting_metadata<R: Runtime>(
         }
         Ok(None) => {
             log_warn!("Meeting not found: {}", meeting_id);
-            Err(format!("Meeting not found: {}", meeting_id))
+            Err(format!("Meeting nicht gefunden: {}", meeting_id))
         }
         Err(e) => {
             log_error!("Error retrieving meeting metadata {}: {}", meeting_id, e);
-            Err(format!("Failed to retrieve meeting metadata: {}", e))
+            Err(format!("Meeting-Metadaten konnten nicht abgerufen werden: {}", e))
         }
     }
 }
@@ -891,7 +891,7 @@ pub async fn api_get_meeting_transcripts<R: Runtime>(
         }
         Err(e) => {
             log_error!("Error retrieving transcripts for meeting {}: {}", meeting_id, e);
-            Err(format!("Failed to retrieve transcripts: {}", e))
+            Err(format!("Transkripte konnten nicht abgerufen werden: {}", e))
         }
     }
 }
@@ -913,15 +913,15 @@ pub async fn api_save_meeting_title<R: Runtime>(
     match MeetingsRepository::update_meeting_title(pool, &meeting_id, &title).await {
         Ok(true) => {
             log_info!("Successfully saved meeting title");
-            Ok(serde_json::json!({"message": "Meeting title saved successfully"}))
+            Ok(serde_json::json!({"message": "Meeting-Titel erfolgreich gespeichert"}))
         }
         Ok(false) => {
             log_error!("No meeting found with id {}", meeting_id);
-            Err(format!("No meeting found with id {}", meeting_id))
+            Err(format!("Kein Meeting mit ID {} gefunden", meeting_id))
         }
         Err(e) => {
             log_error!("Failed to update meeting {}", e);
-            Err(format!("Failed to update meeting: {}", e))
+            Err(format!("Meeting konnte nicht aktualisiert werden: {}", e))
         }
     }
 }
@@ -958,7 +958,7 @@ pub async fn api_save_transcript<R: Runtime>(
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| {
             log_error!("Failed to parse transcript segments: {}", e);
-            format!("Invalid transcript data format: {}. Please check the data structure.", e)
+            format!("Ungültiges Transkriptdatenformat: {}. Bitte überprüfen Sie die Datenstruktur.", e)
         })?;
 
     // Log parsed segments count and first segment details
@@ -988,7 +988,7 @@ pub async fn api_save_transcript<R: Runtime>(
             );
             Ok(serde_json::json!({
                 "status": "success",
-                "message": "Transcript saved successfully",
+                "message": "Transkript erfolgreich gespeichert",
                 "meeting_id": meeting_id
             }))
         }
@@ -998,7 +998,7 @@ pub async fn api_save_transcript<R: Runtime>(
                 meeting_title,
                 e
             );
-            Err(format!("Failed to save transcript: {}", e))
+            Err(format!("Transkript konnte nicht gespeichert werden: {}", e))
         }
     }
 }
@@ -1032,7 +1032,7 @@ pub async fn open_meeting_folder<R: Runtime>(
                 let path = std::path::Path::new(&folder_path);
                 if !path.exists() {
                     log_warn!("Folder path does not exist: {}", folder_path);
-                    return Err(format!("Recording folder not found: {}", folder_path));
+                    return Err(format!("Aufnahmeordner nicht gefunden: {}", folder_path));
                 }
 
                 // Open folder based on OS
@@ -1041,7 +1041,7 @@ pub async fn open_meeting_folder<R: Runtime>(
                     std::process::Command::new("open")
                         .arg(&folder_path)
                         .spawn()
-                        .map_err(|e| format!("Failed to open folder: {}", e))?;
+                        .map_err(|e| format!("Ordner konnte nicht geöffnet werden: {}", e))?;
                 }
 
                 #[cfg(target_os = "windows")]
@@ -1049,7 +1049,7 @@ pub async fn open_meeting_folder<R: Runtime>(
                     std::process::Command::new("explorer")
                         .arg(&folder_path)
                         .spawn()
-                        .map_err(|e| format!("Failed to open folder: {}", e))?;
+                        .map_err(|e| format!("Ordner konnte nicht geöffnet werden: {}", e))?;
                 }
 
                 #[cfg(target_os = "linux")]
@@ -1057,19 +1057,19 @@ pub async fn open_meeting_folder<R: Runtime>(
                     std::process::Command::new("xdg-open")
                         .arg(&folder_path)
                         .spawn()
-                        .map_err(|e| format!("Failed to open folder: {}", e))?;
+                        .map_err(|e| format!("Ordner konnte nicht geöffnet werden: {}", e))?;
                 }
 
                 log_info!("Successfully opened folder: {}", folder_path);
                 Ok(())
             } else {
                 log_warn!("Meeting {} has no folder_path set", meeting_id);
-                Err("Recording folder path not available for this meeting".to_string())
+                Err("Aufnahmeordner-Pfad für dieses Meeting nicht verfügbar".to_string())
             }
         }
         None => {
             log_warn!("Meeting not found: {}", meeting_id);
-            Err("Meeting not found".to_string())
+            Err("Meeting nicht gefunden".to_string())
         }
     }
 }
@@ -1097,10 +1097,10 @@ pub async fn test_backend_connection<R: Runtime>(
         Ok(response) => {
             let status = response.status();
             log_debug!("Backend responded with status: {}", status);
-            Ok(format!("Backend is reachable. Status: {}", status))
+            Ok(format!("Backend ist erreichbar. Status: {}", status))
         }
         Err(e) => {
-            let error_msg = format!("Failed to connect to backend: {}", e);
+            let error_msg = format!("Verbindung zum Backend fehlgeschlagen: {}", e);
             log_debug!("{}", error_msg);
             Err(error_msg)
         }
@@ -1119,7 +1119,7 @@ pub async fn debug_backend_connection<R: Runtime>(app: AppHandle<R>) -> Result<S
         }
         Err(e) => {
             log_error!("✗ Failed to get server URL: {}", e);
-            return Err(format!("Failed to get server URL: {}", e));
+            return Err(format!("Server-URL konnte nicht abgerufen werden: {}", e));
         }
     };
 
@@ -1134,13 +1134,13 @@ pub async fn debug_backend_connection<R: Runtime>(app: AppHandle<R>) -> Result<S
             let status = response.status();
             log_debug!("✓ Backend responded with status: {}", status);
             Ok(format!(
-                "Backend connection successful! Status: {}, URL: {}",
+                "Backend-Verbindung erfolgreich! Status: {}, URL: {}",
                 status, server_url
             ))
         }
         Err(e) => {
             log_error!("✗ Backend connection failed: {}", e);
-            Err(format!("Backend connection failed: {}", e))
+            Err(format!("Backend-Verbindung fehlgeschlagen: {}", e))
         }
     }
 }
@@ -1160,7 +1160,7 @@ pub async fn open_external_url(url: String) -> Result<(), String> {
 
     match result {
         Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to open URL: {}", e)),
+        Err(e) => Err(format!("URL konnte nicht geöffnet werden: {}", e)),
     }
 }
 
@@ -1187,31 +1187,31 @@ pub async fn api_save_custom_openai_config<R: Runtime>(
 
     // Validate required fields
     if endpoint.trim().is_empty() {
-        return Err("Endpoint URL is required".to_string());
+        return Err("Endpunkt-URL ist erforderlich".to_string());
     }
     if model.trim().is_empty() {
-        return Err("Model name is required".to_string());
+        return Err("Modellname ist erforderlich".to_string());
     }
 
     // Validate endpoint URL format
     if !endpoint.starts_with("http://") && !endpoint.starts_with("https://") {
-        return Err("Endpoint must start with http:// or https://".to_string());
+        return Err("Endpunkt muss mit http:// oder https:// beginnen".to_string());
     }
 
     // Validate optional numeric parameters
     if let Some(temp) = temperature {
         if !(0.0..=2.0).contains(&temp) {
-            return Err("Temperature must be between 0.0 and 2.0".to_string());
+            return Err("Temperatur muss zwischen 0,0 und 2,0 liegen".to_string());
         }
     }
     if let Some(top) = top_p {
         if !(0.0..=1.0).contains(&top) {
-            return Err("Top P must be between 0.0 and 1.0".to_string());
+            return Err("Top P muss zwischen 0,0 und 1,0 liegen".to_string());
         }
     }
     if let Some(tokens) = max_tokens {
         if tokens < 1 {
-            return Err("Max tokens must be at least 1".to_string());
+            return Err("Max Tokens muss mindestens 1 sein".to_string());
         }
     }
 
@@ -1231,12 +1231,12 @@ pub async fn api_save_custom_openai_config<R: Runtime>(
             log_info!("✅ Successfully saved custom OpenAI config for endpoint: {}", config.endpoint);
             Ok(serde_json::json!({
                 "status": "success",
-                "message": "Custom OpenAI configuration saved successfully"
+                "message": "Benutzerdefinierte OpenAI-Konfiguration erfolgreich gespeichert"
             }))
         }
         Err(e) => {
             log_error!("❌ Failed to save custom OpenAI config: {}", e);
-            Err(format!("Failed to save custom OpenAI configuration: {}", e))
+            Err(format!("Benutzerdefinierte OpenAI-Konfiguration konnte nicht gespeichert werden: {}", e))
         }
     }
 }
@@ -1263,7 +1263,7 @@ pub async fn api_get_custom_openai_config<R: Runtime>(
         }
         Err(e) => {
             log_error!("❌ Failed to get custom OpenAI config: {}", e);
-            Err(format!("Failed to get custom OpenAI configuration: {}", e))
+            Err(format!("Benutzerdefinierte OpenAI-Konfiguration konnte nicht abgerufen werden: {}", e))
         }
     }
 }

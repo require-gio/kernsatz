@@ -28,7 +28,7 @@ pub fn show_console() -> Result<String, String> {
         if console_window == ptr::null_mut() {
             // If no console exists, allocate one
             if AllocConsole() == 0 {
-                return Err("Failed to allocate console".to_string());
+                return Err("Konsole konnte nicht zugewiesen werden".to_string());
             }
             // Reinitialize stdout, stdin, stderr for the new console
             std::env::set_var("RUST_LOG", "info");
@@ -37,7 +37,7 @@ pub fn show_console() -> Result<String, String> {
             // Show existing console window
             ShowWindow(console_window, SW_SHOW);
         }
-        Ok("Console shown".to_string())
+        Ok("Konsole angezeigt".to_string())
     }
     
     #[cfg(target_os = "macos")]
@@ -49,13 +49,13 @@ pub fn show_console() -> Result<String, String> {
             .arg(r#"
                 tell application "Terminal"
                     activate
-                    do script "log stream --process meetily --level info --style compact"
+                    do script "log stream --process kernsatz --level info --style compact"
                 end tell
             "#)
             .spawn()
         {
-            Ok(_) => Ok("Console opened in Terminal".to_string()),
-            Err(e) => Err(format!("Failed to open console: {}", e)),
+            Ok(_) => Ok("Konsole im Terminal geöffnet".to_string()),
+            Err(e) => Err(format!("Konsole konnte nicht geöffnet werden: {}", e)),
         }
     }
     
@@ -72,9 +72,9 @@ pub fn hide_console() -> Result<String, String> {
         let console_window = GetConsoleWindow();
         if console_window != ptr::null_mut() {
             ShowWindow(console_window, SW_HIDE);
-            Ok("Console hidden".to_string())
+            Ok("Konsole ausgeblendet".to_string())
         } else {
-            Err("No console window found".to_string())
+            Err("Kein Konsolenfenster gefunden".to_string())
         }
     }
     
@@ -87,7 +87,7 @@ pub fn hide_console() -> Result<String, String> {
                 tell application "Terminal"
                     set windowList to windows
                     repeat with aWindow in windowList
-                        if contents of selected tab of aWindow contains "log stream --process meetily" then
+                        if contents of selected tab of aWindow contains "log stream --process kernsatz" then
                             close aWindow
                         end if
                     end repeat
@@ -95,14 +95,14 @@ pub fn hide_console() -> Result<String, String> {
             "#)
             .spawn()
         {
-            Ok(_) => Ok("Console closed".to_string()),
-            Err(e) => Err(format!("Failed to close console: {}", e)),
+            Ok(_) => Ok("Konsole geschlossen".to_string()),
+            Err(e) => Err(format!("Konsole konnte nicht geschlossen werden: {}", e)),
         }
     }
     
     #[cfg(not(any(target_os = "windows", target_os = "macos")))]
     {
-        Ok("Console control is only available on Windows and macOS".to_string())
+        Ok("Konsolensteuerung ist nur unter Windows und macOS verfügbar".to_string())
     }
 }
 
@@ -129,7 +129,7 @@ pub fn toggle_console() -> Result<String, String> {
                 tell application "Terminal"
                     set windowList to windows
                     repeat with aWindow in windowList
-                        if contents of selected tab of aWindow contains "log stream --process meetily" then
+                        if contents of selected tab of aWindow contains "log stream --process kernsatz" then
                             return "found"
                         end if
                     end repeat

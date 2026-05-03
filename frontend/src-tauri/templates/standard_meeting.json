@@ -1,27 +1,28 @@
 {
-  "name": "Standard Meeting Notes",
-  "description": "A standard template for general meetings, focusing on key outcomes and actions.",
+  "name": "Standard-Meeting",
+  "description": "Eine Standardvorlage für allgemeine Meetings mit Fokus auf wichtige Ergebnisse und Aktionen.",
   "sections": [
     {
-      "title": "Summary",
-      "instruction": "Provide a brief, one-paragraph executive summary of the entire meeting.",
+      "title": "Zusammenfassung",
+      "instruction": "Kurzer Absatz, der das Meeting, seinen Zweck und die wichtigsten Punkte zusammenfasst",
       "format": "paragraph"
     },
     {
-      "title": "Key Decisions",
-      "instruction": "List the most important decisions made during the meeting.",
-      "format": "list"
-    },
-    {
-      "title": "Action Items",
-      "instruction": "List all assigned tasks with their owners and due date. Always add reference transcript segment and timestamp in the table.",
+      "title": "Wichtige Entscheidungen",
+      "instruction": "In diesem Meeting getroffene Entscheidungen mit Begründung und Zeitstempel",
       "format": "list",
-      "item_format": "| **Owner** | Task | Due | Reference Transcript Segment | Segment Time stamp |\n| --- | --- | --- | --- | --- |"
+      "item_format": "| **Entscheidung** | **Begründung** | **Zeitstempel** |\n| --- | --- | --- |"
     },
     {
-      "title": "Discussion Highlights",
-      "instruction": "Summarize the main topics of discussion, key arguments, and important insights.",
-      "format": "paragraph"
+      "title": "Aktionspunkte",
+      "instruction": "Aufgaben mit Verantwortlichen, Fälligkeitsdatum, Priorität und Status",
+      "format": "list",
+      "item_format": "| **Verantwortlich** | **Aufgabe** | **Fälligkeit** | **Priorität** | **Status** |\n| --- | --- | --- | --- | --- |"
+    },
+    {
+      "title": "Diskussionshöhepunkte",
+      "instruction": "Listen Sie wichtige Diskussionen, Erwähnungen oder Beobachtungen auf",
+      "format": "list"
     }
   ]
 }

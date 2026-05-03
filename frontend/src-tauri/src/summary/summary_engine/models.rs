@@ -6,6 +6,30 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 // ============================================================================
+// Model Name Constants
+// ============================================================================
+
+/// Model name for Ministral 3B (primary/recommended model)
+pub const MODEL_NAME_MINISTRAL_3B: &str = "ministral:3b";
+
+/// Model name for Gemma 3 1B (fast/lightweight model)
+pub const MODEL_NAME_GEMMA3_1B: &str = "gemma3:1b";
+
+/// Model name for Gemma 3 4B
+pub const MODEL_NAME_GEMMA3_4B: &str = "gemma3:4b";
+
+/// Size of the Ministral 3B model in MB
+pub const MODEL_SIZE_MB_MINISTRAL_3B: u64 = 2150;
+
+/// Size of the Gemma 3 1B model in MB
+pub const MODEL_SIZE_MB_GEMMA3_1B: u64 = 806;
+
+/// Size of the Gemma 3 4B model in MB
+pub const MODEL_SIZE_MB_GEMMA3_4B: u64 = 2500;
+
+pub const DEFAULT_MODEL_NAME: &str = MODEL_NAME_MINISTRAL_3B; // Default to the more powerful model, but can be overridden based on system requirements
+
+// ============================================================================
 // Model Definitions
 // ============================================================================
 
@@ -28,7 +52,7 @@ pub struct SamplingParams {
 /// Definition of a built-in AI model with all metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelDef {
-    /// Model name in format "family:variant" (e.g., "gemma3:1b")
+    /// Model name in format "family:variant" (e.g., MODEL_NAME_GEMMA3_1B)
     /// This is what's stored in database as model field when provider="builtin-ai"
     pub name: String,
 
@@ -64,15 +88,34 @@ pub struct ModelDef {
 /// Get all available built-in AI models
 /// Add new models here - the system will automatically detect and manage them
 pub fn get_available_models() -> Vec<ModelDef> {
+    
     vec![
+        // Ministral 3B - German-optimized tier
+        ModelDef {
+            name: MODEL_NAME_MINISTRAL_3B.to_string(),
+            display_name: "Ministral 3B (Deutsch)".to_string(),
+            gguf_file: "Ministral-3-3B-Instruct-2512-Q4_K_M.gguf".to_string(),
+            template: "mistral".to_string(),
+            download_url: "https://huggingface.co/mistralai/Ministral-3-3B-Instruct-2512-GGUF/resolve/main/Ministral-3-3B-Instruct-2512-Q4_K_M.gguf".to_string(),
+            size_mb: MODEL_SIZE_MB_MINISTRAL_3B,
+            context_size: 32768,
+            layer_count: 36,
+            sampling: SamplingParams {
+                temperature: 0.1,
+                top_k: 40,
+                top_p: 0.9,
+                stop_tokens: vec!["</s>".to_string()],
+            },
+            description: "Mehrsprachiges Modell mit starker deutscher Unterstützung. ~2,2GB Download.".to_string(),
+        },
         // Gemma 3 1B - Fast tier
         ModelDef {
-            name: "gemma3:1b".to_string(),
-            display_name: "Gemma 3 1B (Fast)".to_string(),
+            name: MODEL_NAME_GEMMA3_1B.to_string(),
+            display_name: "Gemma 3 1B (Schnell)".to_string(),
             gguf_file: "gemma-3-1b-it-Q8_0.gguf".to_string(),
             template: "gemma3".to_string(),
             download_url: "https://meetily.towardsgeneralintelligence.com/models/gemma-3-1b-it-Q8_0.gguf".to_string(),
-            size_mb: 1019,
+            size_mb: MODEL_SIZE_MB_GEMMA3_1B,
             context_size: 32768, 
             layer_count: 26,     
             sampling: SamplingParams {
@@ -81,24 +124,7 @@ pub fn get_available_models() -> Vec<ModelDef> {
                 top_p: 0.95,
                 stop_tokens: vec!["<end_of_turn>".to_string()],
             },
-            description: "Fastest model. Runs on any hardware with ~1GB RAM. Good for quick summaries.".to_string(),
-        },
-        ModelDef {
-            name: "gemma3:4b".to_string(),
-            display_name: "Gemma 3 4B (Balanced)".to_string(),
-            gguf_file: "gemma-3-4b-it-Q4_K_M.gguf".to_string(),
-            template: "gemma3".to_string(),
-            download_url: "https://meetily.towardsgeneralintelligence.com/models/gemma-3-4b-it-Q4_K_M.gguf".to_string(),
-            size_mb: 2374,
-            context_size: 32768, // Supports 128k, but 32k is good for local·
-            layer_count: 35,
-            sampling: SamplingParams {
-                temperature: 1.0,
-                top_k: 64,
-                top_p: 0.95,
-                stop_tokens: vec!["<end_of_turn>".to_string()],
-            },
-            description: "Balanced model. Great quality/speed trade-off. Requires ~3.5GB RAM.".to_string(),
+            description: "Schnellstes Modell. Läuft auf jeder Hardware mit ~1GB RAM. Gut für schnelle Zusammenfassungen, schlechter in deutscher Grammatik.".to_string(),
         },
     ]
 }
@@ -136,6 +162,9 @@ pub fn get_models_directory(app_data_dir: &PathBuf) -> PathBuf {
 // Prompt Templates (Model-Specific Formatting)
 // ============================================================================
 
+/// Mistral Instruct chat template format (Ministral 3B and similar)
+pub const MISTRAL_TEMPLATE: &str = "[INST] {system_prompt}\n\n{user_prompt} [/INST]";
+
 /// Gemma 3 chat template format
 pub const GEMMA3_TEMPLATE: &str = "\
 <start_of_turn>user
@@ -161,6 +190,7 @@ pub fn format_prompt(
 ) -> Result<String> {
     let template = match template_name {
         "gemma3" => GEMMA3_TEMPLATE,
+        "mistral" => MISTRAL_TEMPLATE,
         _ => return Err(anyhow!("Unknown template: {}", template_name)),
     };
 

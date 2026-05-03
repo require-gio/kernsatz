@@ -56,7 +56,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
       }
     } catch (error) {
       console.error('Failed to fetch built-in AI models:', error);
-      toast.error('Failed to load models');
+      toast.error('Modelle konnten nicht geladen werden');
     } finally {
       setIsLoading(false);
       setHasFetched(true);
@@ -121,7 +121,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
           });
           // Refresh models list
           fetchModels();
-          toast.success(`Model ${model} downloaded successfully`);
+          toast.success(`Modell ${model} erfolgreich heruntergeladen`);
         }
 
         // Handle cancelled status
@@ -210,7 +210,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
       }
 
       // For real errors, show toast and remove from downloading
-      toast.error(`Failed to download ${modelName}`);
+      toast.error(`${modelName} konnte nicht heruntergeladen werden`);
 
       setDownloadingModels((prev) => {
         const newSet = new Set(prev);
@@ -226,7 +226,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
   const cancelDownload = async (modelName: string) => {
     try {
       await invoke('builtin_ai_cancel_download', { modelName });
-      toast.info(`Download of ${modelName} cancelled`);
+      toast.info(`Download von ${modelName} abgebrochen`);
       setDownloadingModels((prev) => {
         const newSet = new Set(prev);
         newSet.delete(modelName);
@@ -240,11 +240,11 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
   const deleteModel = async (modelName: string) => {
     try {
       await invoke('builtin_ai_delete_model', { modelName });
-      toast.success(`Model ${modelName} deleted`);
+      toast.success(`Modell ${modelName} gelöscht`);
       fetchModels();
     } catch (error) {
       console.error('Failed to delete model:', error);
-      toast.error(`Failed to delete ${modelName}`);
+      toast.error(`${modelName} konnte nicht gelöscht werden`);
     }
   };
 
@@ -253,7 +253,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
     return (
       <div className="text-center py-8 text-muted-foreground">
         <RefreshCw className="mx-auto h-8 w-8 animate-spin mb-2" />
-        Loading models...
+        Modelle werden geladen...
       </div>
     );
   }
@@ -263,7 +263,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
     return (
       <Alert>
         <AlertDescription>
-          No models found. Download a model to get started with Built-in AI.
+          Keine Modelle gefunden. Laden Sie ein Modell herunter, um mit der eingebauten KI zu starten.
         </AlertDescription>
       </Alert>
     );
@@ -272,7 +272,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-bold">Built-in AI Models</h4>
+        <h4 className="text-sm font-bold">Eingebaute KI-Modelle</h4>
       </div>
 
       <div className="grid gap-4">
@@ -312,11 +312,11 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                       <>
                         <span className="text-xs text-green-600 font-medium flex items-center gap-1">
                           <span className="w-2 h-2 rounded-full bg-green-600"></span>
-                          Ready
+                          Bereit
                         </span>
                         {selectedModel === model.name && (
                           <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
-                            Selected
+                            Ausgewählt
                           </span>
                         )}
                       </>
@@ -324,17 +324,17 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                     {isCorrupted && (
                       <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded flex items-center gap-1">
                         <BadgeAlert className="w-3 h-3" />
-                        Corrupted
+                        Beschädigt
                       </span>
                     )}
                     {isError && (
                       <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded">
-                        Error
+                        Fehler
                       </span>
                     )}
                     {isNotDownloaded && !modelIsDownloading && (
                       <span className="text-xs text-gray-600 font-medium">
-                        Not Downloaded
+                        Nicht heruntergeladen
                       </span>
                     )}
                   </div>
@@ -347,8 +347,8 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         {isError && typeof model.status === 'object' && 'Error' in model.status
                           ? (model.status as any).Error
                           : isCorrupted
-                          ? 'File is corrupted. Retry download or delete.'
-                          : 'An error occurred'}
+                          ? 'Datei ist beschädigt. Download wiederholen oder löschen.'
+                          : 'Ein Fehler ist aufgetreten'}
                       </p>
                     )}
                     <div className="text-xs text-gray-500">
@@ -385,7 +385,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         cancelDownload(model.name);
                       }}
                     >
-                      Cancel
+                      Abbrechen
                     </Button>
                   )}
 
@@ -401,7 +401,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                       }}
                     >
                       <RefreshCw className="mr-2 h-4 w-4" />
-                      Retry
+                      Erneut versuchen
                     </Button>
                   )}
 
@@ -417,7 +417,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         }}
                       >
                         <RefreshCw className="mr-2 h-4 w-4" />
-                        Retry
+                        Erneut versuchen
                       </Button>
                       <Button
                         variant="outline"
@@ -428,7 +428,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         }}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
+                        Löschen
                       </Button>
                     </>
                   )}
@@ -441,7 +441,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         e.stopPropagation();
                         deleteModel(model.name);
                       }}
-                      title="Delete model"
+                      title="Modell löschen"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -453,7 +453,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
               {modelIsDownloading && progress !== undefined && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-900">Downloading...</span>
+                    <span className="text-sm font-medium text-gray-900">Wird heruntergeladen...</span>
                     <span className="text-sm font-semibold text-gray-900">
                       {Math.round(progress)}%
                     </span>

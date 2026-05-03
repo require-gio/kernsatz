@@ -189,11 +189,11 @@ async fn run_retranscription<R: Runtime>(
     );
 
     // Emit progress: decoding
-    emit_progress(&app, &meeting_id, "decoding", 5, "Decoding audio file...");
+    emit_progress(&app, &meeting_id, "decoding", 5, "Audiodatei wird dekodiert...");
 
     // Check for cancellation
     if RETRANSCRIPTION_CANCELLED.load(Ordering::SeqCst) {
-        return Err(anyhow!("Retranscription cancelled"));
+        return Err(anyhow!("Neutranskription abgebrochen"));
     }
 
     // Decode the audio file (CPU-intensive, run in blocking task)
@@ -210,11 +210,11 @@ async fn run_retranscription<R: Runtime>(
         duration_seconds, decoded.sample_rate, decoded.channels
     );
 
-    emit_progress(&app, &meeting_id, "decoding", 15, "Converting audio format...");
+    emit_progress(&app, &meeting_id, "decoding", 15, "Audioformat wird konvertiert...");
 
     // Check for cancellation
     if RETRANSCRIPTION_CANCELLED.load(Ordering::SeqCst) {
-        return Err(anyhow!("Retranscription cancelled"));
+        return Err(anyhow!("Neutranskription abgebrochen"));
     }
 
     // Convert to 16kHz mono format (CPU-intensive, run in blocking task)
@@ -225,11 +225,11 @@ async fn run_retranscription<R: Runtime>(
     .map_err(|e| anyhow!("Resample task panicked: {}", e))?;
     info!("Converted to 16kHz mono format: {} samples", audio_samples.len());
 
-    emit_progress(&app, &meeting_id, "vad", 20, "Detecting speech segments...");
+    emit_progress(&app, &meeting_id, "vad", 20, "Sprachsegmente werden erkannt...");
 
     // Check for cancellation
     if RETRANSCRIPTION_CANCELLED.load(Ordering::SeqCst) {
-        return Err(anyhow!("Retranscription cancelled"));
+        return Err(anyhow!("Neutranskription abgebrochen"));
     }
 
     // Use VAD to find natural speech boundaries (same approach as live transcription)
@@ -250,7 +250,7 @@ async fn run_retranscription<R: Runtime>(
                     &meeting_id_for_vad,
                     "vad",
                     overall_progress,
-                    &format!("Detecting speech segments... {}% ({} found)", vad_progress, segments_found),
+                    &format!("Sprachsegmente werden erkannt... {}% ({} gefunden)", vad_progress, segments_found),
                 );
 
                 // Return false to cancel if cancellation requested
@@ -293,10 +293,10 @@ async fn run_retranscription<R: Runtime>(
 
     if total_segments == 0 {
         warn!("No speech detected in audio");
-        return Err(anyhow!("No speech detected in audio file"));
+        return Err(anyhow!("Keine Sprache in der Audiodatei erkannt"));
     }
 
-    emit_progress(&app, &meeting_id, "transcribing", 25, "Loading transcription engine...");
+    emit_progress(&app, &meeting_id, "transcribing", 25, "Transkriptions-Engine wird geladen...");
 
     // Initialize the appropriate engine once (not per-segment)
     let whisper_engine = if !use_parakeet {
@@ -342,7 +342,7 @@ async fn run_retranscription<R: Runtime>(
     for (i, segment) in processable_segments.iter().enumerate() {
         // Check for cancellation before each segment
         if RETRANSCRIPTION_CANCELLED.load(Ordering::SeqCst) {
-            return Err(anyhow!("Retranscription cancelled"));
+            return Err(anyhow!("Neutranskription abgebrochen"));
         }
 
         // Calculate progress (25% to 80% range for transcription)
@@ -354,7 +354,7 @@ async fn run_retranscription<R: Runtime>(
             "transcribing",
             progress,
             &format!(
-                "Transcribing segment {} of {} ({:.1}s)...",
+                "Transkribiere Segment {} von {} ({:.1}s)...",
                 i + 1,
                 processable_count,
                 segment_duration_sec
@@ -413,10 +413,10 @@ async fn run_retranscription<R: Runtime>(
 
     // Check for cancellation
     if RETRANSCRIPTION_CANCELLED.load(Ordering::SeqCst) {
-        return Err(anyhow!("Retranscription cancelled"));
+        return Err(anyhow!("Neutranskription abgebrochen"));
     }
 
-    emit_progress(&app, &meeting_id, "saving", 80, "Saving transcripts...");
+    emit_progress(&app, &meeting_id, "saving", 80, "Transkripte werden gespeichert...");
 
     // Create transcript segments with proper timestamps from VAD
     let segments = create_transcript_segments(&all_transcripts);
@@ -466,7 +466,7 @@ async fn run_retranscription<R: Runtime>(
     );
 
     // Write updated transcripts.json and metadata.json to the meeting folder
-    emit_progress(&app, &meeting_id, "saving", 90, "Writing transcript files...");
+    emit_progress(&app, &meeting_id, "saving", 90, "Transkriptdateien werden geschrieben...");
 
     if let Err(e) = write_transcripts_json(&folder_path, &segments) {
         warn!("Failed to write transcripts.json: {}", e);
@@ -488,7 +488,7 @@ async fn run_retranscription<R: Runtime>(
         warn!("Failed to update metadata.json: {}", e);
     }
 
-    emit_progress(&app, &meeting_id, "complete", 100, "Retranscription complete");
+    emit_progress(&app, &meeting_id, "complete", 100, "Neutranskription abgeschlossen");
 
     Ok(RetranscriptionResult {
         meeting_id,

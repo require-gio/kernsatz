@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
 import { X, Download, Check, Loader2, ArrowBigDownDash } from 'lucide-react';
+import { MODEL_SIZE_MB_GEMMA3_1B, MODEL_SIZE_MB_GEMMA3_4B } from '@/constants/models';
 
 interface DownloadProgress {
   modelName: string;
@@ -315,7 +316,7 @@ export function useDownloadProgressToast() {
         displayName: `Summary Model (${model})`,
         progress: progress ?? 0,
         downloadedMb: downloaded_mb ?? 0,
-        totalMb: total_mb ?? (model.includes('4b') ? 2500 : 806),
+        totalMb: total_mb ?? (model.includes('4b') ? MODEL_SIZE_MB_GEMMA3_4B : MODEL_SIZE_MB_GEMMA3_1B),
         speedMbps: speed_mbps ?? 0,
         status: status === 'completed' || progress >= 100
           ? 'completed'

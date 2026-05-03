@@ -56,7 +56,7 @@ pub fn start_transcription_task<R: Runtime>(
                 error!("Failed to initialize transcription engine: {}", e);
                 let _ = app.emit("transcription-error", serde_json::json!({
                     "error": e,
-                    "userMessage": "Recording failed: Unable to initialize speech recognition. Please check your model settings.",
+                    "userMessage": "Aufnahme fehlgeschlagen: Spracherkennung konnte nicht initialisiert werden. Bitte überprüfen Sie Ihre Modelleinstellungen.",
                     "actionable": true
                 }));
                 return;
@@ -182,7 +182,7 @@ pub fn start_transcription_task<R: Runtime>(
                                         if !current_flag {
                                             SPEECH_DETECTED_EMITTED.store(true, Ordering::SeqCst);
                                             match app_clone.emit("speech-detected", serde_json::json!({
-                                                "message": "Speech activity detected"
+                                                "message": "Sprachaktivität erkannt"
                                             })) {
                                                 Ok(_) => info!("🎤 ✅ First speech detected - successfully emitted speech-detected event"),
                                                 Err(e) => error!("🎤 ❌ Failed to emit speech-detected event: {}", e),
@@ -285,7 +285,7 @@ pub fn start_transcription_task<R: Runtime>(
                                 "chunks_completed": completed,
                                 "chunks_queued": queued,
                                 "progress_percentage": progress_percentage,
-                                "message": format!("Worker {} processing... ({}/{})", worker_id, completed, queued)
+                                "message": format!("Worker {} verarbeitet... ({}/{})", worker_id, completed, queued)
                             }));
                         }
                         None => {
@@ -346,7 +346,7 @@ pub fn start_transcription_task<R: Runtime>(
         // Emit final chunk count to frontend
         let _ = app.emit("transcription-queue-complete", serde_json::json!({
             "total_chunks": total_chunks_queued,
-            "message": format!("{} chunks queued for processing - waiting for completion", total_chunks_queued)
+            "message": format!("{} Abschnitte zur Verarbeitung eingereiht – Fertigstellung wird abgewartet", total_chunks_queued)
         }));
 
         // Wait for all workers to complete
@@ -392,7 +392,7 @@ pub fn start_transcription_task<R: Runtime>(
                         "chunks_queued": final_queued,
                         "chunks_completed": final_completed,
                         "chunks_lost": final_queued - final_completed,
-                        "message": "Some transcript chunks may have been lost during shutdown"
+                        "message": "Einige Transkript-Abschnitte könnten beim Herunterfahren verloren gegangen sein"
                     }),
                 );
                 break;
@@ -476,7 +476,7 @@ async fn transcribe_chunk_with_provider<R: Runtime>(
                         "transcription-error",
                         &serde_json::json!({
                             "error": transcription_error.to_string(),
-                            "userMessage": format!("Transcription failed: {}", transcription_error),
+                            "userMessage": format!("Transkription fehlgeschlagen: {}", transcription_error),
                             "actionable": false
                         }),
                     );
@@ -512,7 +512,7 @@ async fn transcribe_chunk_with_provider<R: Runtime>(
                         "transcription-error",
                         &serde_json::json!({
                             "error": transcription_error.to_string(),
-                            "userMessage": format!("Transcription failed: {}", transcription_error),
+                            "userMessage": format!("Transkription fehlgeschlagen: {}", transcription_error),
                             "actionable": false
                         }),
                     );
@@ -560,7 +560,7 @@ async fn transcribe_chunk_with_provider<R: Runtime>(
                         "transcription-error",
                         &serde_json::json!({
                             "error": e.to_string(),
-                            "userMessage": format!("Transcription failed: {}", e),
+                            "userMessage": format!("Transkription fehlgeschlagen: {}", e),
                             "actionable": false
                         }),
                     );

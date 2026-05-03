@@ -887,7 +887,7 @@ class DatabaseManager:
                 meeting = await cursor.fetchone()
                 
                 if not meeting:
-                    raise ValueError(f"Meeting with ID {meeting_id} not found")
+                    raise ValueError(f"Meeting mit ID {meeting_id} nicht gefunden")
                 
                 # Update the summary in the summary_processes table
                 await conn.execute("""

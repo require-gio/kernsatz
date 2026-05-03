@@ -7,6 +7,7 @@ use tauri::{AppHandle, Emitter, Manager, Runtime, State};
 use tokio::sync::Mutex;
 
 use super::model_manager::{DownloadProgress, ModelInfo, ModelManager};
+use super::models::{MODEL_NAME_MINISTRAL_3B, MODEL_NAME_GEMMA3_1B};
 
 // ============================================================================
 // Global State
@@ -48,14 +49,14 @@ pub async fn builtin_ai_list_models<R: Runtime>(
                 drop(manager_lock);
                 init_model_manager(&app)
                     .await
-                    .map_err(|e| format!("Failed to initialize model manager: {}", e))?;
+                    .map_err(|e| format!("Modell-Manager konnte nicht initialisiert werden: {}", e))?;
             }
         }
 
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone()
     };
 
@@ -78,14 +79,14 @@ pub async fn builtin_ai_get_model_info<R: Runtime>(
                 drop(manager_lock);
                 init_model_manager(&app)
                     .await
-                    .map_err(|e| format!("Failed to initialize model manager: {}", e))?;
+                    .map_err(|e| format!("Modell-Manager konnte nicht initialisiert werden: {}", e))?;
             }
         }
 
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone()
     };
 
@@ -108,14 +109,14 @@ pub async fn builtin_ai_download_model<R: Runtime>(
                 drop(manager_lock);
                 init_model_manager(&app)
                     .await
-                    .map_err(|e| format!("Failed to initialize model manager: {}", e))?;
+                    .map_err(|e| format!("Modell-Manager konnte nicht initialisiert werden: {}", e))?;
             }
         }
 
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone() // Clone the Arc, not the ModelManager
     };
     // IMPORTANT: Only emit "downloading" status here, never "completed"
@@ -191,7 +192,7 @@ pub async fn builtin_ai_cancel_download<R: Runtime>(
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone()
     };
 
@@ -222,7 +223,7 @@ pub async fn builtin_ai_delete_model(
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone()
     };
 
@@ -248,14 +249,14 @@ pub async fn builtin_ai_is_model_ready<R: Runtime>(
                 drop(manager_lock);
                 init_model_manager(&app)
                     .await
-                    .map_err(|e| format!("Failed to initialize model manager: {}", e))?;
+                    .map_err(|e| format!("Modell-Manager konnte nicht initialisiert werden: {}", e))?;
             }
         }
 
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone()
     };
 
@@ -287,14 +288,14 @@ pub async fn builtin_ai_get_available_summary_model<R: Runtime>(
                 drop(manager_lock);
                 init_model_manager(&app)
                     .await
-                    .map_err(|e| format!("Failed to initialize model manager: {}", e))?;
+                    .map_err(|e| format!("Modell-Manager konnte nicht initialisiert werden: {}", e))?;
             }
         }
 
         let manager_lock = state.0.lock().await;
         manager_lock
             .as_ref()
-            .ok_or_else(|| "Model manager not initialized".to_string())?
+            .ok_or_else(|| "Modell-Manager nicht initialisiert".to_string())?
             .clone()
     };
 
@@ -302,7 +303,7 @@ pub async fn builtin_ai_get_available_summary_model<R: Runtime>(
     manager
         .scan_models()
         .await
-        .map_err(|e| format!("Failed to scan models: {}", e))?;
+        .map_err(|e| format!("Modelle konnten nicht gescannt werden: {}", e))?;
 
     // Get all available models
     let all_models = manager.list_models().await;
@@ -313,8 +314,8 @@ pub async fn builtin_ai_get_available_summary_model<R: Runtime>(
         .filter(|m| matches!(m.status, crate::summary::summary_engine::model_manager::ModelStatus::Available))
         .max_by_key(|m| {
             match m.name.as_str() {
-                "gemma3:4b" => 2,
-                "gemma3:1b" => 1,
+                MODEL_NAME_MINISTRAL_3B => 2,
+                MODEL_NAME_GEMMA3_1B => 1,
                 _ => 0,
             }
         })
@@ -334,17 +335,17 @@ pub async fn init_model_manager_at_startup<R: Runtime>(
     let models_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data dir: {}", e))?
+        .map_err(|e| format!("App-Datenverzeichnis konnte nicht abgerufen werden: {}", e))?
         .join("models")
         .join("summary");
 
     let manager = ModelManager::new_with_models_dir(Some(models_dir))
-        .map_err(|e| format!("Failed to create ModelManager: {}", e))?;
+        .map_err(|e| format!("ModelManager konnte nicht erstellt werden: {}", e))?;
 
     manager
         .init()
         .await
-        .map_err(|e| format!("Failed to initialize ModelManager: {}", e))?;
+        .map_err(|e| format!("ModelManager konnte nicht initialisiert werden: {}", e))?;
 
     let state: State<ModelManagerState> = app.state();
     let mut manager_lock = state.0.lock().await;
@@ -356,8 +357,7 @@ pub async fn init_model_manager_at_startup<R: Runtime>(
 
 
 /// Get recommended summary model based on platform and system RAM
-/// macOS + >16GB RAM → gemma3:4b (2.5 GB, balanced)
-/// Otherwise → gemma3:1b (1019 MB, fast)
+/// Otherwise → gemma3:1b (806 MB, fast)
 #[tauri::command]
 pub async fn builtin_ai_get_recommended_model() -> Result<String, String> {
     // Get system RAM in GB
@@ -368,11 +368,11 @@ pub async fn builtin_ai_get_recommended_model() -> Result<String, String> {
 
     log::info!("System RAM detected: {} GB, Platform: {}", system_ram_gb, if is_macos { "macOS" } else { "other" });
 
-    // Recommend model: gemma3:4b only on macOS with >16GB RAM
-    let recommended = if is_macos && system_ram_gb > 16 {
-        "gemma3:4b"       // macOS + >16GB RAM: gemma3:4b (2.5 GB, balanced)
+    // Recommend model: ministral:3b only on macOS with >16GB RAM
+    let recommended = if system_ram_gb <= 8 {
+        MODEL_NAME_GEMMA3_1B
     } else {
-        "gemma3:1b"       // All other cases: gemma3:1b (806 MB, fast)
+        MODEL_NAME_MINISTRAL_3B
     };
 
     log::info!("Recommended summary model: {} (macOS={}, {}GB RAM)", recommended, is_macos, system_ram_gb);

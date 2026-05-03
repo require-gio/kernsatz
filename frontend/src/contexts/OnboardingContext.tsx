@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { PermissionStatus, OnboardingPermissions } from '@/types/onboarding';
+import { DEFAULT_MODEL_NAME, isBuiltinSummaryModel } from '@/constants/models';
 
 const PARAKEET_MODEL = 'parakeet-tdt-0.6b-v3-int8';
 
@@ -83,7 +84,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     totalMb: 0,
     speedMbps: 0,
   });
-  const [selectedSummaryModel, setSelectedSummaryModel] = useState<string>('gemma3:1b');
+  const [selectedSummaryModel, setSelectedSummaryModel] = useState<string>(DEFAULT_MODEL_NAME);
   const [databaseExists, setDatabaseExists] = useState(false);
   const [isBackgroundDownloading, setIsBackgroundDownloading] = useState(false);
 
@@ -111,7 +112,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         console.log('[OnboardingContext] Set recommended model:', recommendedModel);
       } catch (error) {
         console.error('[OnboardingContext] Failed to get recommended model:', error);
-        // Keep default gemma3:1b
+        // Keep default model
       }
     };
     fetchRecommendation();
@@ -140,7 +141,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const performAutoDetection = async () => {
     // Check Homebrew (macOS only)
     if (typeof navigator !== 'undefined' && navigator.platform?.toLowerCase().includes('mac')) {
-      const homebrewDbPath = '/usr/local/var/meetily/meeting_minutes.db';
+      const homebrewDbPath = '/usr/local/var/kernsatz/meeting_minutes.db';
       try {
         const homebrewCheck = await invoke<{ exists: boolean; size: number } | null>(
           'check_homebrew_database',
@@ -265,8 +266,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       'builtin-ai-download-progress',
       (event) => {
         const { model, progress, downloaded_mb, total_mb, speed_mbps, status } = event.payload;
-        // Check if this is the selected summary model (gemma3:1b or gemma3:4b)
-        if (model === selectedSummaryModel || model === 'gemma3:1b' || model === 'gemma3:4b') {
+        // Check if this is the selected summary model
+        if (model === selectedSummaryModel || isBuiltinSummaryModel(model)) {
           setSummaryModelProgress(progress);
           setSummaryModelProgressInfo({
             percent: progress,
@@ -438,7 +439,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       if (includeGemma && !summaryModelDownloaded) {
         setTimeout(() => {
           console.log('[OnboardingContext] Starting Gemma download (delayed to prioritize Parakeet)');
-          invoke('builtin_ai_download_model', { modelName: selectedSummaryModel || 'gemma3:1b' })
+          invoke('builtin_ai_download_model', { modelName: selectedSummaryModel || DEFAULT_MODEL_NAME })
             .catch(err => console.error('[OnboardingContext] Gemma download failed:', err));
         }, 3000); // 3 second delay to give Parakeet priority
       }

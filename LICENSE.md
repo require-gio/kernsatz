@@ -1,5 +1,9 @@
 MIT License
 
+Copyright (c) 2026 Giorgi Lomidze – kernsatz
+
+Based on "kernsatz" by Zackriya Solutions (https://github.com/Zackriya-Solutions/meetily),
+originally published under the MIT License:
 Copyright (c) 2024 Zackriya Solutions
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

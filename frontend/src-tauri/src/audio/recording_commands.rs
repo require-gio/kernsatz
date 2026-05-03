@@ -84,7 +84,7 @@ pub async fn start_recording_with_meeting_name<R: Runtime>(
     let current_recording_state = IS_RECORDING.load(Ordering::SeqCst);
     info!("🔍 IS_RECORDING state check: {}", current_recording_state);
     if current_recording_state {
-        return Err("Recording already in progress".to_string());
+        return Err("Aufnahme läuft bereits".to_string());
     }
 
     // Validate that transcription models are available before starting recording
@@ -96,7 +96,7 @@ pub async fn start_recording_with_meeting_name<R: Runtime>(
         // (download progress is already shown in top-right toast)
         let _ = app.emit("transcription-error", serde_json::json!({
             "error": validation_error,
-            "userMessage": "Recording cannot start: Transcription model is still downloading. Please wait for the download to complete.",
+            "userMessage": "Aufnahme kann nicht gestartet werden: Transkriptionsmodell wird noch heruntergeladen. Bitte warten Sie, bis der Download abgeschlossen ist.",
             "actionable": false
         }));
 
@@ -163,7 +163,7 @@ pub async fn start_recording_with_meeting_name<R: Runtime>(
                 }
                 Err(e) => {
                     error!("❌ No default microphone available");
-                    return Err(format!("No microphone device available: {}", e));
+                    return Err(format!("Kein Mikrofon verfügbar: {}", e));
                 }
             }
         }
@@ -234,7 +234,7 @@ pub async fn start_recording_with_meeting_name<R: Runtime>(
     let transcription_receiver = manager
         .start_recording(microphone_device, system_device, auto_save)
         .await
-        .map_err(|e| format!("Failed to start recording: {}", e))?;
+        .map_err(|e| format!("Aufnahme konnte nicht gestartet werden: {}", e))?;
 
     // Store the manager globally to keep it alive
     {
@@ -289,7 +289,7 @@ pub async fn start_recording_with_meeting_name<R: Runtime>(
 
     // Emit success event
     app.emit("recording-started", serde_json::json!({
-        "message": "Recording started successfully with parallel processing",
+        "message": "Aufnahme erfolgreich gestartet",
         "devices": ["Default Microphone", "Default System Audio"],
         "workers": 3
     })).map_err(|e| e.to_string())?;
@@ -327,7 +327,7 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
     let current_recording_state = IS_RECORDING.load(Ordering::SeqCst);
     info!("🔍 IS_RECORDING state check: {}", current_recording_state);
     if current_recording_state {
-        return Err("Recording already in progress".to_string());
+        return Err("Aufnahme läuft bereits".to_string());
     }
 
     // Validate that transcription models are available before starting recording
@@ -339,7 +339,7 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
         // (download progress is already shown in top-right toast)
         let _ = app.emit("transcription-error", serde_json::json!({
             "error": validation_error,
-            "userMessage": "Recording cannot start: Transcription model is still downloading. Please wait for the download to complete.",
+            "userMessage": "Aufnahme kann nicht gestartet werden: Transkriptionsmodell wird noch heruntergeladen. Bitte warten Sie, bis der Download abgeschlossen ist.",
             "actionable": false
         }));
 
@@ -350,7 +350,7 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
     // Parse devices
     let mic_device = if let Some(ref name) = mic_device_name {
         Some(Arc::new(parse_audio_device(name).map_err(|e| {
-            format!("Invalid microphone device '{}': {}", name, e)
+            format!("Ungültiges Mikrofongerät '{}': {}", name, e)
         })?))
     } else {
         None
@@ -358,7 +358,7 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
 
     let system_device = if let Some(ref name) = system_device_name {
         Some(Arc::new(parse_audio_device(name).map_err(|e| {
-            format!("Invalid system device '{}': {}", name, e)
+            format!("Ungültiges Systemgerät '{}': {}", name, e)
         })?))
     } else {
         None
@@ -402,7 +402,7 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
     let transcription_receiver = manager
         .start_recording(mic_device, system_device, auto_save)
         .await
-        .map_err(|e| format!("Failed to start recording: {}", e))?;
+        .map_err(|e| format!("Aufnahme konnte nicht gestartet werden: {}", e))?;
 
     // Store the manager globally to keep it alive
     {
@@ -457,7 +457,7 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
 
     // Emit success event
     app.emit("recording-started", serde_json::json!({
-        "message": "Recording started with custom devices and parallel processing",
+        "message": "Aufnahme mit benutzerdefinierten Geräten gestartet",
         "devices": [
             mic_device_name.unwrap_or_else(|| "Default Microphone".to_string()),
             system_device_name.unwrap_or_else(|| "Default System Audio".to_string())
@@ -493,7 +493,7 @@ pub async fn stop_recording<R: Runtime>(
         "recording-shutdown-progress",
         serde_json::json!({
             "stage": "stopping_audio",
-            "message": "Stopping audio capture...",
+            "message": "Audio-Aufnahme wird gestoppt...",
             "progress": 20
         }),
     );
@@ -524,7 +524,7 @@ pub async fn stop_recording<R: Runtime>(
         }
         Err(e) => {
             error!("❌ Failed to stop audio streams: {}", e);
-            return Err(format!("Failed to stop audio streams: {}", e));
+            return Err(format!("Audio-Streams konnten nicht gestoppt werden: {}", e));
         }
     }
 
@@ -543,7 +543,7 @@ pub async fn stop_recording<R: Runtime>(
         "recording-shutdown-progress",
         serde_json::json!({
             "stage": "processing_transcripts",
-            "message": "Processing remaining transcript chunks...",
+            "message": "Verbleibende Transkript-Abschnitte werden verarbeitet...",
             "progress": 40
         }),
     );
@@ -571,7 +571,7 @@ pub async fn stop_recording<R: Runtime>(
                     "recording-shutdown-progress",
                     serde_json::json!({
                         "stage": "processing_transcripts",
-                        "message": format!("Processing transcripts... ({}s elapsed)", elapsed),
+                        "message": format!("Transkripte werden verarbeitet... ({}s vergangen)", elapsed),
                         "progress": 40,
                         "detailed": true,
                         "elapsed_seconds": elapsed
@@ -609,7 +609,7 @@ pub async fn stop_recording<R: Runtime>(
         "recording-shutdown-progress",
         serde_json::json!({
             "stage": "unloading_model",
-            "message": "Unloading speech recognition model...",
+            "message": "Spracherkennungsmodell wird entladen...",
             "progress": 70
         }),
     );
@@ -801,7 +801,7 @@ pub async fn stop_recording<R: Runtime>(
         "recording-shutdown-progress",
         serde_json::json!({
             "stage": "finalizing",
-            "message": "Finalizing recording and cleaning up resources...",
+            "message": "Aufnahme wird abgeschlossen und Ressourcen werden freigegeben...",
             "progress": 90
         }),
     );
@@ -867,7 +867,7 @@ pub async fn stop_recording<R: Runtime>(
         "recording-shutdown-progress",
         serde_json::json!({
             "stage": "complete",
-            "message": "Recording stopped successfully",
+            "message": "Aufnahme erfolgreich gestoppt",
             "progress": 100
         }),
     );
@@ -876,7 +876,7 @@ pub async fn stop_recording<R: Runtime>(
     app.emit(
         "recording-stopped",
         serde_json::json!({
-            "message": "Recording stopped - frontend will save after all transcripts received",
+            "message": "Aufnahme gestoppt – Frontend speichert nach Erhalt aller Transkripte",
             "folder_path": folder_path_str,
             "meeting_name": meeting_name_str
         }),
@@ -911,7 +911,7 @@ pub async fn pause_recording<R: Runtime>(app: AppHandle<R>) -> Result<(), String
 
     // Check if currently recording
     if !IS_RECORDING.load(Ordering::SeqCst) {
-        return Err("No recording is currently active".to_string());
+        return Err("Keine Aufnahme aktiv".to_string());
     }
 
     // Access the recording manager and pause it
@@ -923,7 +923,7 @@ pub async fn pause_recording<R: Runtime>(app: AppHandle<R>) -> Result<(), String
         app.emit(
             "recording-paused",
             serde_json::json!({
-                "message": "Recording paused"
+                "message": "Aufnahme pausiert"
             }),
         )
         .map_err(|e| e.to_string())?;
@@ -934,7 +934,7 @@ pub async fn pause_recording<R: Runtime>(app: AppHandle<R>) -> Result<(), String
         info!("Recording paused successfully");
         Ok(())
     } else {
-        Err("No recording manager found".to_string())
+        Err("Kein Aufnahme-Manager gefunden".to_string())
     }
 }
 
@@ -945,7 +945,7 @@ pub async fn resume_recording<R: Runtime>(app: AppHandle<R>) -> Result<(), Strin
 
     // Check if currently recording
     if !IS_RECORDING.load(Ordering::SeqCst) {
-        return Err("No recording is currently active".to_string());
+        return Err("Keine Aufnahme aktiv".to_string());
     }
 
     // Access the recording manager and resume it
@@ -957,7 +957,7 @@ pub async fn resume_recording<R: Runtime>(app: AppHandle<R>) -> Result<(), Strin
         app.emit(
             "recording-resumed",
             serde_json::json!({
-                "message": "Recording resumed"
+                "message": "Aufnahme fortgesetzt"
             }),
         )
         .map_err(|e| e.to_string())?;
@@ -968,7 +968,7 @@ pub async fn resume_recording<R: Runtime>(app: AppHandle<R>) -> Result<(), Strin
         info!("Recording resumed successfully");
         Ok(())
     } else {
-        Err("No recording manager found".to_string())
+        Err("Kein Aufnahme-Manager gefunden".to_string())
     }
 }
 

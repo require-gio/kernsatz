@@ -185,7 +185,7 @@ async def get_meeting(meeting_id: str):
     try:
         meeting = await db.get_meeting(meeting_id)
         if not meeting:
-            raise HTTPException(status_code=404, detail="Meeting not found")
+            raise HTTPException(status_code=404, detail="Meeting nicht gefunden")
         return meeting
     except HTTPException:
         raise
@@ -198,7 +198,7 @@ async def save_meeting_title(data: MeetingTitleUpdate):
     """Save a meeting title"""
     try:
         await db.update_meeting_title(data.meeting_id, data.title)
-        return {"message": "Meeting title saved successfully"}
+        return {"message": "Meeting-Titel erfolgreich gespeichert"}
     except Exception as e:
         logger.error(f"Error saving meeting title: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -209,9 +209,9 @@ async def delete_meeting(data: DeleteMeetingRequest):
     try:
         success = await db.delete_meeting(data.meeting_id)
         if success:
-            return {"message": "Meeting deleted successfully"}
+            return {"message": "Meeting erfolgreich gelöscht"}
         else:
-            raise HTTPException(status_code=500, detail="Failed to delete meeting")
+            raise HTTPException(status_code=500, detail="Meeting konnte nicht gelöscht werden")
     except Exception as e:
         logger.error(f"Error deleting meeting: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -230,7 +230,7 @@ async def process_transcript_background(process_id: str, transcript: TranscriptR
             api_key = await processor.db.get_api_key(transcript.model)
             if not api_key:
                 provider_names = {"claude": "Anthropic", "groq": "Groq", "openai": "OpenAI"}
-                raise ValueError(f"{provider_names.get(transcript.model, transcript.model)} API key not configured. Please set your API key in the model settings.")
+                raise ValueError(f"{provider_names.get(transcript.model, transcript.model)} API-Schlüssel nicht konfiguriert. Bitte setzen Sie Ihren API-Schlüssel in den Modelleinstellungen.")
 
         _, all_json_data = await processor.process_transcript(
             text=transcript.text,
@@ -305,7 +305,7 @@ async def process_transcript_background(process_id: str, transcript: TranscriptR
             await processor.db.update_process(process_id, status="completed", result=json.dumps(final_summary))
             logger.info(f"Background processing completed for process_id: {process_id}")
         else:
-            error_msg = "Summary generation failed: No chunks were processed successfully. Check logs for specific errors."
+            error_msg = "Zusammenfassung fehlgeschlagen: Keine Abschnitte wurden erfolgreich verarbeitet. Prüfen Sie die Logs für Details."
             await processor.db.update_process(process_id, status="failed", error=error_msg)
             logger.error(f"Background processing failed for process_id: {process_id} - {error_msg}")
 
@@ -319,7 +319,7 @@ async def process_transcript_background(process_id: str, transcript: TranscriptR
             logger.error(f"Failed to update DB status to failed for {process_id}: {db_e}", exc_info=True)
     except Exception as e:
         # Handle all other exceptions
-        error_msg = f"Processing error: {str(e)}"
+        error_msg = f"Verarbeitungsfehler: {str(e)}"
         logger.error(f"Error in background processing for {process_id}: {error_msg}", exc_info=True)
         try:
             await processor.db.update_process(process_id, status="failed", error=error_msg)
@@ -357,7 +357,7 @@ async def process_transcript_api(
         )
 
         return JSONResponse({
-            "message": "Processing started",
+            "message": "Verarbeitung gestartet",
             "process_id": process_id
         })
 
@@ -380,7 +380,7 @@ async def get_summary(meeting_id: str):
                     "data": None,
                     "start": None,
                     "end": None,
-                    "error": "Meeting ID not found"
+                    "error": "Meeting-ID nicht gefunden"
                 }
             )
 
@@ -467,7 +467,7 @@ async def get_summary(meeting_id: str):
 
         if status == "failed":
             response["status"] = "error"
-            response["error"] = result.get("error", "Unknown processing error")
+            response["error"] = result.get("error", "Unbekannter Verarbeitungsfehler")
             response["data"] = None
             response["meetingName"] = None
             logger.info(f"Returning failed status with error: {response['error']}")
@@ -480,7 +480,7 @@ async def get_summary(meeting_id: str):
         elif status == "completed":
             if not summary_data:
                 response["status"] = "error"
-                response["error"] = "Completed but summary data is missing or invalid"
+                response["error"] = "Abgeschlossen, aber Zusammenfassungsdaten fehlen oder sind ungültig"
                 response["data"] = None
                 response["meetingName"] = None
                 return JSONResponse(status_code=500, content=response)
@@ -488,7 +488,7 @@ async def get_summary(meeting_id: str):
 
         else:
             response["status"] = "error"
-            response["error"] = f"Unknown or unexpected status: {status}"
+            response["error"] = f"Unbekannter oder unerwarteter Status: {status}"
             response["data"] = None
             response["meetingName"] = None
             return JSONResponse(status_code=500, content=response)
@@ -504,7 +504,7 @@ async def get_summary(meeting_id: str):
                 "data": None,
                 "start": None,
                 "end": None,
-                "error": f"Internal server error: {str(e)}"
+                "error": f"Interner Serverfehler: {str(e)}"
             }
         )
 
@@ -542,7 +542,7 @@ async def save_transcript(request: SaveTranscriptRequest):
             )
 
         logger.info("Transcripts saved successfully")
-        return {"status": "success", "message": "Transcript saved successfully", "meeting_id": meeting_id}
+        return {"status": "success", "message": "Transkript erfolgreich gespeichert", "meeting_id": meeting_id}
     except Exception as e:
         logger.error(f"Error saving transcript: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -563,7 +563,7 @@ async def save_model_config(request: SaveModelConfigRequest):
     await db.save_model_config(request.provider, request.model, request.whisperModel)
     if request.apiKey != None:
         await db.save_api_key(request.apiKey, request.provider)
-    return {"status": "success", "message": "Model configuration saved successfully"}  
+    return {"status": "success", "message": "Modellkonfiguration erfolgreich gespeichert"}  
 
 @app.get("/get-transcript-config")
 async def get_transcript_config():
@@ -581,7 +581,7 @@ async def save_transcript_config(request: SaveTranscriptConfigRequest):
     await db.save_transcript_config(request.provider, request.model)
     if request.apiKey != None:
         await db.save_transcript_api_key(request.apiKey, request.provider)
-    return {"status": "success", "message": "Transcript configuration saved successfully"}
+    return {"status": "success", "message": "Transkript-Konfiguration erfolgreich gespeichert"}
 
 class GetApiKeyRequest(BaseModel):
     provider: str
@@ -609,7 +609,7 @@ async def save_meeting_summary(data: MeetingSummaryUpdate):
     """Save a meeting summary"""
     try:
         await db.update_meeting_summary(data.meeting_id, data.summary)
-        return {"message": "Meeting summary saved successfully"}
+        return {"message": "Meeting-Zusammenfassung erfolgreich gespeichert"}
     except ValueError as ve:
         logger.error(f"Value error saving meeting summary: {str(ve)}")
         raise HTTPException(status_code=404, detail=str(ve))

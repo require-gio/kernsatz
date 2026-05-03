@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import Analytics from '@/lib/analytics';
 import { isOllamaNotInstalledError } from '@/lib/utils';
 import { BuiltInModelInfo } from '@/lib/builtin-ai';
+import { MODEL_NAME_GEMMA3_1B } from '@/constants/models';
 
 type SummaryStatus = 'idle' | 'processing' | 'summarizing' | 'regenerating' | 'completed' | 'error';
 
@@ -425,7 +426,7 @@ export function useSummaryGeneration({
 
         if (!models || models.length === 0) {
           toast.error(
-            'No Ollama models found. Please download gemma3:1b from Model Settings.',
+            `No Ollama models found. Please download ${MODEL_NAME_GEMMA3_1B} from Model Settings.`,
             { duration: 5000 }
           );
           return;

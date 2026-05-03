@@ -9,6 +9,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { LoaderIcon } from "lucide-react";
 import { useConfig } from "@/contexts/ConfigContext";
 import { usePaginatedTranscripts } from "@/hooks/usePaginatedTranscripts";
+import { MODEL_NAME_GEMMA3_1B } from "@/constants/models";
 
 interface MeetingDetailsResponse {
   id: string;
@@ -48,12 +49,12 @@ function MeetingDetailsContent() {
     error: transcriptError,
   } = usePaginatedTranscripts({ meetingId: meetingId || '' });
 
-  // Check if gemma3:1b model is available in Ollama
+  // Check if MODEL_NAME_GEMMA3_1B model is available in Ollama
   const checkForGemmaModel = useCallback(async (): Promise<boolean> => {
     try {
       const models = await invoke('get_ollama_models', { endpoint: null }) as any[];
-      const hasGemma = models.some((m: any) => m.name === 'gemma3:1b');
-      console.log('🔍 Checked for gemma3:1b:', hasGemma);
+      const hasGemma = models.some((m: any) => m.name === MODEL_NAME_GEMMA3_1B);
+      console.log(`🔍 Checked for ${MODEL_NAME_GEMMA3_1B}:`, hasGemma);
       return hasGemma;
     } catch (error) {
       console.error('❌ Failed to check Ollama models:', error);
@@ -91,11 +92,11 @@ function MeetingDetailsContent() {
         return;
       }
 
-      // DB is empty - check if gemma3:1b exists as fallback
+      // DB is empty - check if MODEL_NAME_GEMMA3_1B exists as fallback
       const hasGemma = await checkForGemmaModel();
 
       if (hasGemma) {
-        console.log('💾 DB empty, using gemma3:1b as initial default');
+        console.log(`💾 DB empty, using ${MODEL_NAME_GEMMA3_1B} as initial default`);
 
         await invoke('api_save_model_config', {
           provider: 'ollama',
@@ -107,7 +108,7 @@ function MeetingDetailsContent() {
 
         setShouldAutoGenerate(true);
       } else {
-        console.log('⚠️ No model configured and gemma3:1b not found');
+        console.log(`⚠️ No model configured and ${MODEL_NAME_GEMMA3_1B} not found`);
       }
     } catch (error) {
       console.error('❌ Failed to setup auto-generation:', error);

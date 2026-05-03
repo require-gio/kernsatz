@@ -1,4 +1,4 @@
-# Meetily API Documentation
+# kernsatz API Documentation
 
 ## Prerequisites
 

@@ -46,7 +46,7 @@ pub async fn parakeet_init() -> Result<(), String> {
 
     let models_dir = get_models_directory();
     let engine = ParakeetEngine::new_with_models_dir(models_dir)
-        .map_err(|e| format!("Failed to initialize Parakeet engine: {}", e))?;
+        .map_err(|e| format!("Parakeet-Engine konnte nicht initialisiert werden: {}", e))?;
     *guard = Some(Arc::new(engine));
     Ok(())
 }
@@ -62,9 +62,9 @@ pub async fn parakeet_get_available_models() -> Result<Vec<ModelInfo>, String> {
         engine
             .discover_models()
             .await
-            .map_err(|e| format!("Failed to discover Parakeet models: {}", e))
+            .map_err(|e| format!("Parakeet-Modelle konnten nicht gefunden werden: {}", e))
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -92,7 +92,7 @@ pub async fn parakeet_load_model<R: Runtime>(
         let result = engine
             .load_model(&model_name)
             .await
-            .map_err(|e| format!("Failed to load Parakeet model: {}", e));
+            .map_err(|e| format!("Parakeet-Modell konnte nicht geladen werden: {}", e));
 
         // Emit model loading completed/failed event
         if result.is_ok() {
@@ -118,7 +118,7 @@ pub async fn parakeet_load_model<R: Runtime>(
 
         result
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -132,7 +132,7 @@ pub async fn parakeet_get_current_model() -> Result<Option<String>, String> {
     if let Some(engine) = engine {
         Ok(engine.get_current_model().await)
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -146,7 +146,7 @@ pub async fn parakeet_is_model_loaded() -> Result<bool, String> {
     if let Some(engine) = engine {
         Ok(engine.is_model_loaded().await)
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -161,7 +161,7 @@ pub async fn parakeet_has_available_models() -> Result<bool, String> {
         let models = engine
             .discover_models()
             .await
-            .map_err(|e| format!("Failed to discover Parakeet models: {}", e))?;
+            .map_err(|e| format!("Parakeet-Modelle konnten nicht gefunden werden: {}", e))?;
 
         // Check if at least one model is available
         let available_models: Vec<_> = models
@@ -217,11 +217,11 @@ pub async fn parakeet_validate_model_ready() -> Result<String, String> {
         engine
             .load_model(&first_model.name)
             .await
-            .map_err(|e| format!("Failed to load Parakeet model {}: {}", first_model.name, e))?;
+            .map_err(|e| format!("Parakeet-Modell {} konnte nicht geladen werden: {}", first_model.name, e))?;
 
         Ok(first_model.name.clone())
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -286,7 +286,7 @@ pub async fn parakeet_validate_model_ready_with_config<R: tauri::Runtime>(
         let models = engine
             .discover_models()
             .await
-            .map_err(|e| format!("Failed to discover Parakeet models: {}", e))?;
+            .map_err(|e| format!("Parakeet-Modelle konnten nicht gefunden werden: {}", e))?;
 
         let available_models: Vec<_> = models
             .iter()
@@ -295,7 +295,7 @@ pub async fn parakeet_validate_model_ready_with_config<R: tauri::Runtime>(
 
         if available_models.is_empty() {
             return Err(
-                "No Parakeet models are available. Please download a model to enable fast transcription."
+                "Keine Parakeet-Modelle verfügbar. Bitte laden Sie ein Modell herunter, um die schnelle Transkription zu aktivieren."
                     .to_string(),
             );
         }
@@ -335,11 +335,11 @@ pub async fn parakeet_validate_model_ready_with_config<R: tauri::Runtime>(
         engine
             .load_model(&model_name)
             .await
-            .map_err(|e| format!("Failed to load Parakeet model {}: {}", model_name, e))?;
+            .map_err(|e| format!("Parakeet-Modell {} konnte nicht geladen werden: {}", model_name, e))?;
 
         Ok(model_name)
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -354,9 +354,9 @@ pub async fn parakeet_transcribe_audio(audio_data: Vec<f32>) -> Result<String, S
         engine
             .transcribe_audio(audio_data)
             .await
-            .map_err(|e| format!("Parakeet transcription failed: {}", e))
+            .map_err(|e| format!("Parakeet-Transkription fehlgeschlagen: {}", e))
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -371,7 +371,7 @@ pub async fn parakeet_get_models_directory() -> Result<String, String> {
         let path = engine.get_models_directory().await;
         Ok(path.to_string_lossy().to_string())
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -455,11 +455,11 @@ pub async fn parakeet_download_model<R: Runtime>(
                 ) {
                     log::error!("Failed to emit parakeet download error event: {}", emit_e);
                 }
-                Err(format!("Failed to download Parakeet model: {}", e))
+                Err(format!("Parakeet-Modell konnte nicht heruntergeladen werden: {}", e))
             }
         }
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 
@@ -477,7 +477,7 @@ pub async fn parakeet_cancel_download<R: Runtime>(
         engine
             .cancel_download(&model_name)
             .await
-            .map_err(|e| format!("Failed to cancel Parakeet download: {}", e))?;
+            .map_err(|e| format!("Parakeet-Download konnte nicht abgebrochen werden: {}", e))?;
 
         // Emit cancellation event to update UI (global toast and component state)
         let _ = app_handle.emit(
@@ -492,7 +492,7 @@ pub async fn parakeet_cancel_download<R: Runtime>(
         log::info!("Parakeet download cancelled: {}", model_name);
         Ok(())
     } else {
-        Err("Parakeet engine not initialized".to_string())
+        Err("Parakeet-Engine nicht initialisiert".to_string())
     }
 }
 

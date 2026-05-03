@@ -44,15 +44,15 @@ pub fn get_openrouter_models() -> Result<Vec<OpenRouterModel>, String> {
     let response = client
         .get("https://openrouter.ai/api/v1/models")
         .send()
-        .map_err(|e| format!("Failed to make HTTP request: {}", e))?;
+        .map_err(|e| format!("HTTP-Anfrage konnte nicht gesendet werden: {}", e))?;
 
     if !response.status().is_success() {
-        return Err(format!("HTTP request failed with status: {}", response.status()));
+        return Err(format!("HTTP-Anfrage fehlgeschlagen mit Status: {}", response.status()));
     }
 
     let api_response: OpenRouterResponse = response
         .json()
-        .map_err(|e| format!("Failed to parse JSON response: {}", e))?;
+        .map_err(|e| format!("JSON-Antwort konnte nicht verarbeitet werden: {}", e))?;
 
     let models = api_response
         .data

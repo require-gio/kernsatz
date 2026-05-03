@@ -86,7 +86,7 @@ impl LLMProvider {
             "openrouter" => Ok(Self::OpenRouter),
             "builtin-ai" | "local-llama" | "localllama" => Ok(Self::BuiltInAI),
             "custom-openai" => Ok(Self::CustomOpenAI),
-            _ => Err(format!("Unsupported LLM provider: {}", s)),
+            _ => Err(format!("Nicht unterstützter LLM-Anbieter: {}", s)),
         }
     }
 }
@@ -128,14 +128,14 @@ pub async fn generate_summary(
     // Check if cancelled before starting
     if let Some(token) = cancellation_token {
         if token.is_cancelled() {
-            return Err("Summary generation was cancelled".to_string());
+            return Err("Zusammenfassungserstellung wurde abgebrochen".to_string());
         }
     }
 
     // Handle BuiltInAI provider separately (uses local sidecar, no HTTP API)
     if provider == &LLMProvider::BuiltInAI {
         let app_data_dir = app_data_dir
-            .ok_or_else(|| "app_data_dir is required for BuiltInAI provider".to_string())?;
+            .ok_or_else(|| "app_data_dir ist für den BuiltInAI-Anbieter erforderlich".to_string())?;
 
         return crate::summary::summary_engine::generate_with_builtin(
             app_data_dir,
@@ -172,7 +172,7 @@ pub async fn generate_summary(
         }
         LLMProvider::CustomOpenAI => {
             let endpoint = custom_openai_endpoint
-                .ok_or_else(|| "Custom OpenAI endpoint not configured".to_string())?;
+                .ok_or_else(|| "Benutzerdefinierter OpenAI-Endpunkt nicht konfiguriert".to_string())?;
             (
                 format!("{}/chat/completions", endpoint.trim_end_matches('/')),
                 header::HeaderMap::new(),
@@ -184,13 +184,13 @@ pub async fn generate_summary(
                 "x-api-key",
                 api_key
                     .parse()
-                    .map_err(|_| "Invalid API key format".to_string())?,
+                    .map_err(|_| "Ungültiges API-Schlüssel-Format".to_string())?,
             );
             header_map.insert(
                 "anthropic-version",
                 "2023-06-01"
                     .parse()
-                    .map_err(|_| "Invalid anthropic version".to_string())?,
+                    .map_err(|_| "Ungültige Anthropic-Version".to_string())?,
             );
             ("https://api.anthropic.com/v1/messages".to_string(), header_map)
         }
@@ -206,14 +206,14 @@ pub async fn generate_summary(
             header::AUTHORIZATION,
             format!("Bearer {}", api_key)
                 .parse()
-                .map_err(|_| "Invalid authorization header".to_string())?,
+                .map_err(|_| "Ungültiger Autorisierungs-Header".to_string())?,
         );
     }
     headers.insert(
         header::CONTENT_TYPE,
         "application/json"
             .parse()
-            .map_err(|_| "Invalid content type".to_string())?,
+            .map_err(|_| "Ungültiger Inhaltstyp".to_string())?,
     );
 
     // Build request body based on provider
@@ -269,22 +269,22 @@ pub async fn generate_summary(
             result = request_future => {
                 result.map_err(|e| {
                     if e.is_timeout() {
-                        format!("LLM request timed out after 60 seconds")
+                        format!("LLM-Anfrage nach 60 Sekunden abgelaufen")
                     } else {
-                        format!("Failed to send request to LLM: {}", e)
+                        format!("Anfrage an LLM konnte nicht gesendet werden: {}", e)
                     }
                 })?
             }
             _ = token.cancelled() => {
-                return Err("Summary generation was cancelled".to_string());
+                return Err("Zusammenfassungserstellung wurde abgebrochen".to_string());
             }
         }
     } else {
         request_future.await.map_err(|e| {
             if e.is_timeout() {
-                format!("LLM request timed out after 60 seconds")
+                format!("LLM-Anfrage nach 60 Sekunden abgelaufen")
             } else {
-                format!("Failed to send request to LLM: {}", e)
+                format!("Anfrage an LLM konnte nicht gesendet werden: {}", e)
             }
         })?
     };
@@ -294,7 +294,7 @@ pub async fn generate_summary(
             .text()
             .await
             .unwrap_or_else(|_| "Unknown error".to_string());
-        return Err(format!("LLM API request failed: {}", error_body));
+        return Err(format!("LLM-API-Anfrage fehlgeschlagen: {}", error_body));
     }
 
     // Parse response based on provider
@@ -302,14 +302,14 @@ pub async fn generate_summary(
         let chat_response = response
             .json::<ClaudeChatResponse>()
             .await
-            .map_err(|e| format!("Failed to parse LLM response: {}", e))?;
+            .map_err(|e| format!("LLM-Antwort konnte nicht verarbeitet werden: {}", e))?;
 
         info!("🐞 LLM Response received from Claude");
 
         let content = chat_response
             .content
             .get(0)
-            .ok_or("No content in LLM response")?
+            .ok_or("Kein Inhalt in der LLM-Antwort")?
             .text
             .trim();
         Ok(content.to_string())
@@ -317,14 +317,14 @@ pub async fn generate_summary(
         let chat_response = response
             .json::<ChatResponse>()
             .await
-            .map_err(|e| format!("Failed to parse LLM response: {}", e))?;
+            .map_err(|e| format!("LLM-Antwort konnte nicht verarbeitet werden: {}", e))?;
 
         info!("🐞 LLM Response received from {}", provider_name(provider));
 
         let content = chat_response
             .choices
             .get(0)
-            .ok_or("No content in LLM response")?
+            .ok_or("Kein Inhalt in der LLM-Antwort")?
             .message
             .content
             .trim();

@@ -364,14 +364,14 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({ transcripts, isR
               </p>
               <p className="text-xs mt-1 text-gray-400">
                 {isPaused
-                  ? 'Click resume to continue recording'
-                  : 'Speak to see live transcription'}
+                  ? 'Klicken Sie auf Fortsetzen, um die Aufnahme fortzusetzen'
+                  : 'Sprechen Sie, um die Live-Transkription zu sehen'}
               </p>
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold">Welcome to meetily!</p>
-              <p className="text-xs mt-1">Start recording to see live transcription</p>
+              <p className="text-lg font-semibold">Willkommen bei kernsatz!</p>
+              <p className="text-xs mt-1">Starten Sie die Aufnahme, um die Live-Transkription zu sehen</p>
             </>
           )}
         </motion.div>

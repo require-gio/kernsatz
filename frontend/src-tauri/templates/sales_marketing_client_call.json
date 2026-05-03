@@ -1,44 +1,44 @@
 {
-      "name": "Client / Sales Meeting",
-      "description": "Capture client goals, deliverables, and next steps.",
-      "sections": [
-        {
-          "title": "Meeting Metadata",
-          "instruction": "Date, time, location/modality, account manager",
-          "format": "string"
-        },
-        {
-          "title": "Attendees",
-          "instruction": "Client and vendor attendees with roles",
-          "format": "list"
-        },
-        {
-          "title": "Client Goals & Success Criteria",
-          "instruction": "What the client wants to achieve and how success will be measured",
-          "format": "paragraph"
-        },
-        {
-          "title": "Agreed Deliverables",
-          "instruction": "Deliverables, owners, and due dates",
-          "format": "list",
-          "item_format": "| **Deliverable** | **Owner** | **Due Date** |\n| --- | --- | --- |"
-        },
-        {
-          "title": "Commercial Terms Discussed",
-          "instruction": "Pricing, SLAs, payment terms or contract items discussed",
-          "format": "paragraph"
-        },
-        {
-          "title": "Risks & Concerns",
-          "instruction": "Client concerns, blockers, or escalation items",
-          "format": "list",
-          "item_format": "| **Concern** | **Impact** | **Owner** |\n| --- | --- | --- |"
-        },
-        {
-          "title": "Next Steps",
-          "instruction": "Actions, owners, and due dates",
-          "format": "list",
-          "item_format": "| **Owner** | **Action** | **Due Date** |\n| --- | --- | --- |"
-        }
-      ]
+  "name": "Kunden- / Vertriebs-Meeting",
+  "description": "Erfassen Sie Kundenziele, Ergebnisse und nächste Schritte.",
+  "sections": [
+    {
+      "title": "Meeting-Metadaten",
+      "instruction": "Datum/Uhrzeit, Firmenname, Meeting-Art (z.B. Entdeckung, Abschluss, Quartalsbewertung)",
+      "format": "string"
+    },
+    {
+      "title": "Teilnehmer",
+      "instruction": "Gastgeber, Kunden, Agenturpartner usw.",
+      "format": "list",
+      "item_format": "| **Name** | **Rolle** | **Organisation** |\n| --- | --- | --- |"
+    },
+    {
+      "title": "Kundenziele & Erfolgskriterien",
+      "instruction": "Was der Kunde erreichen möchte und wie der Erfolg gemessen wird",
+      "format": "paragraph"
+    },
+    {
+      "title": "Vereinbarte Liefergegenstände",
+      "instruction": "Zu liefernde Ausgaben und Termine",
+      "format": "list",
+      "item_format": "| **Liefergegenstand** | **Datum** | **Details** |\n| --- | --- | --- |"
+    },
+    {
+      "title": "Besprochene kommerzielle Bedingungen",
+      "instruction": "Preise, Rechnungsstellung, Verträge",
+      "format": "paragraph"
+    },
+    {
+      "title": "Risiken & Bedenken",
+      "instruction": "Alle vom Kunden oder internen Team angesprochenen Vorbehalte",
+      "format": "list"
+    },
+    {
+      "title": "Nächste Schritte",
+      "instruction": "Aufgaben mit Verantwortlichen, Fälligkeitsdatum, Priorität und Status",
+      "format": "list",
+      "item_format": "| **Verantwortlich** | **Aufgabe** | **Fälligkeit** | **Priorität** | **Status** |\n| --- | --- | --- | --- | --- |"
     }
+  ]
+}

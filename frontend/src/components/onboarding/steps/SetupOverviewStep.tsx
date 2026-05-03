@@ -4,6 +4,7 @@ import { Download, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OnboardingContainer } from '../OnboardingContainer';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { MODEL_NAME_GEMMA3_1B, MODEL_NAME_MINISTRAL_3B, MODEL_SIZE_GEMMA3_1B, MODEL_SIZE_MINISTRAL_3B } from '@/constants/models';
 import {
   Tooltip,
   TooltipContent,
@@ -13,8 +14,8 @@ import {
 
 export function SetupOverviewStep() {
   const { goNext } = useOnboarding();
-  const [recommendedModel, setRecommendedModel] = useState<string>('gemma3:1b');
-  const [modelSize, setModelSize] = useState<string>('~806 MB');
+  const [recommendedModel, setRecommendedModel] = useState<string>(MODEL_NAME_GEMMA3_1B);
+  const [modelSize, setModelSize] = useState<string>(MODEL_SIZE_GEMMA3_1B);
   const [isMac, setIsMac] = useState(false);
 
   // Fetch recommended model on mount
@@ -23,10 +24,10 @@ export function SetupOverviewStep() {
       try {
         const model = await invoke<string>('builtin_ai_get_recommended_model');
         setRecommendedModel(model);
-        setModelSize(model === 'gemma3:4b' ? '~2.5 GB' : '~806 MB');
+        setModelSize(model === MODEL_NAME_MINISTRAL_3B ? MODEL_SIZE_MINISTRAL_3B : MODEL_SIZE_GEMMA3_1B);
       } catch (error) {
         console.error('Failed to get recommended model:', error);
-        // Keep default gemma3:1b
+        // Keep default MODEL_NAME_GEMMA3_1B
       }
     };
     fetchRecommendedModel();
@@ -47,12 +48,12 @@ export function SetupOverviewStep() {
     {
       number: 1,
       type: 'transcription',
-      title: 'Download Transcription Engine',
+        title: 'Transkriptions-Engine herunterladen',
     },
     {
       number: 2,
       type: 'summarization',
-      title: 'Download Summarization Engine',
+        title: 'Zusammenfassungs-Engine herunterladen',
     },
   ];
 
@@ -62,8 +63,8 @@ export function SetupOverviewStep() {
 
   return (
     <OnboardingContainer
-      title="Setup Overview"
-      description="Meetily requires that you download the Transcription & Summarization AI models for the software to work."
+        title="Einrichtungsübersicht"
+        description="kernsatz erfordert den Download der Transkriptions- & Zusammenfassungs-KI-Modelle, damit die Software funktioniert."
       step={2}
       totalSteps={isMac ? 4 : 3}
     >
@@ -79,7 +80,7 @@ export function SetupOverviewStep() {
                 >
                   <div className="flex-1 ml-1">
                     <h3 className="font-medium text-gray-900 flex items-center gap-2">
-                        Step {step.number} :  {step.title}
+                        Schritt {step.number}: {step.title}
 
                         {step.type === "summarization" && (
                             <TooltipProvider>
@@ -90,8 +91,8 @@ export function SetupOverviewStep() {
                                 </button>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs text-sm">
-                                You can also select external AI providers like OpenAI, Claude, or
-                                Ollama for summary generation in settings.
+                                  Du kannst auch externe KI-Anbieter wie OpenAI, Claude oder
+                                  Ollama für die Zusammenfassung in den Einstellungen auswählen.
                                 </TooltipContent>
                             </Tooltip>
                             </TooltipProvider>
@@ -111,7 +112,7 @@ export function SetupOverviewStep() {
             onClick={handleContinue}
             className="w-full h-11 bg-gray-900 hover:bg-gray-800 text-white"
           >
-            Let's Go
+            Auf geht's
           </Button>
           <div className="text-center">
             <a
@@ -120,7 +121,7 @@ export function SetupOverviewStep() {
               rel="noopener noreferrer"
               className="text-xs text-gray-600 hover:underline"
             >
-              Report issues on GitHub
+              Probleme auf GitHub melden
             </a>
           </div>
         </div>
