@@ -197,6 +197,93 @@ pub fn list_template_ids() -> Vec<String> {
     ids
 }
 
+/// Save a custom template to the user's custom templates directory
+///
+/// # Arguments
+/// * `template_id` - Template identifier (used as filename without .json extension)
+/// * `json_content` - Validated JSON content to save
+///
+/// # Returns
+/// Ok(()) on success, Err with description on failure
+pub fn save_custom_template(template_id: &str, json_content: &str) -> Result<(), String> {
+    let custom_dir = get_custom_templates_dir()
+        .ok_or_else(|| "Could not determine custom templates directory".to_string())?;
+
+    // Create directory if it doesn't exist
+    if !custom_dir.exists() {
+        std::fs::create_dir_all(&custom_dir)
+            .map_err(|e| format!("Failed to create templates directory: {}", e))?;
+    }
+
+    let template_path = custom_dir.join(format!("{}.json", template_id));
+    info!("Saving custom template '{}' to {:?}", template_id, template_path);
+
+    std::fs::write(&template_path, json_content)
+        .map_err(|e| format!("Failed to write template file: {}", e))?;
+
+    Ok(())
+}
+
+/// Delete a custom template from the user's custom templates directory
+///
+/// # Arguments
+/// * `template_id` - Template identifier to delete
+///
+/// # Returns
+/// Ok(()) on success, Err with description on failure
+pub fn delete_custom_template(template_id: &str) -> Result<(), String> {
+    // Prevent deletion of built-in templates
+    if defaults::get_builtin_template(template_id).is_some() {
+        return Err(format!(
+            "Cannot delete built-in template '{}'. You can only delete custom templates.",
+            template_id
+        ));
+    }
+
+    let custom_dir = get_custom_templates_dir()
+        .ok_or_else(|| "Could not determine custom templates directory".to_string())?;
+
+    let template_path = custom_dir.join(format!("{}.json", template_id));
+
+    if !template_path.exists() {
+        return Err(format!("Custom template '{}' not found", template_id));
+    }
+
+    info!("Deleting custom template '{}' from {:?}", template_id, template_path);
+
+    std::fs::remove_file(&template_path)
+        .map_err(|e| format!("Failed to delete template file: {}", e))?;
+
+    Ok(())
+}
+
+/// Get the raw JSON content of a template for editing
+///
+/// # Arguments
+/// * `template_id` - Template identifier
+///
+/// # Returns
+/// Raw JSON string of the template
+pub fn get_template_json(template_id: &str) -> Result<String, String> {
+    // Try custom template first, then bundled, then built-in
+    if let Some(custom_content) = load_custom_template(template_id) {
+        return Ok(custom_content);
+    }
+    if let Some(bundled_content) = load_bundled_template(template_id) {
+        return Ok(bundled_content);
+    }
+    if let Some(builtin_content) = defaults::get_builtin_template(template_id) {
+        return Ok(builtin_content.to_string());
+    }
+
+    Err(format!("Template '{}' not found", template_id))
+}
+
+/// Check if a template is a built-in template
+pub fn is_builtin_template(template_id: &str) -> bool {
+    defaults::get_builtin_template(template_id).is_some()
+}
+
 /// List all available templates with their metadata
 ///
 /// Returns a list of (id, name, description) tuples

@@ -46,6 +46,7 @@ interface SummaryPanelProps {
   availableTemplates: Array<{ id: string, name: string, description: string }>;
   selectedTemplate: string;
   onTemplateSelect: (templateId: string, templateName: string) => void;
+  onTemplatesChanged: () => void;
   isModelConfigLoading?: boolean;
   onOpenModelSettings?: (openFn: () => void) => void;
 }
@@ -82,6 +83,7 @@ export function SummaryPanel({
   availableTemplates,
   selectedTemplate,
   onTemplateSelect,
+  onTemplatesChanged,
   isModelConfigLoading = false,
   onOpenModelSettings
 }: SummaryPanelProps) {
@@ -115,14 +117,14 @@ export function SummaryPanel({
                 availableTemplates={availableTemplates}
                 selectedTemplate={selectedTemplate}
                 onTemplateSelect={onTemplateSelect}
+                onTemplatesChanged={onTemplatesChanged}
                 hasTranscripts={transcripts.length > 0}
                 isModelConfigLoading={isModelConfigLoading}
                 onOpenModelSettings={onOpenModelSettings}
               />
             </div>
 
-            {/* Right-aligned: Summary Updater Button Group */}
-            <div className="flex-shrink-0">
+            {/* Right-aligned: Summary Updater Button Group */}            <div className="flex-shrink-0">
               <SummaryUpdaterButtonGroup
                 isSaving={isSaving}
                 isDirty={isTitleDirty || (summaryRef.current?.isDirty || false)}
@@ -155,13 +157,13 @@ export function SummaryPanel({
               availableTemplates={availableTemplates}
               selectedTemplate={selectedTemplate}
               onTemplateSelect={onTemplateSelect}
+              onTemplatesChanged={onTemplatesChanged}
               hasTranscripts={transcripts.length > 0}
               isModelConfigLoading={isModelConfigLoading}
               onOpenModelSettings={onOpenModelSettings}
             />
           </div>
-          {/* Loading spinner */}
-          <div className="flex items-center justify-center flex-1">
+          {/* Loading spinner */}          <div className="flex items-center justify-center flex-1">
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
               <p className="text-gray-600">KI-Zusammenfassung wird erstellt...</p>
@@ -183,6 +185,7 @@ export function SummaryPanel({
               availableTemplates={availableTemplates}
               selectedTemplate={selectedTemplate}
               onTemplateSelect={onTemplateSelect}
+              onTemplatesChanged={onTemplatesChanged}
               hasTranscripts={transcripts.length > 0}
               isModelConfigLoading={isModelConfigLoading}
               onOpenModelSettings={onOpenModelSettings}

@@ -123,6 +123,95 @@ pub async fn api_validate_template<R: Runtime>(
     }
 }
 
+/// Saves a custom template to the user's templates directory
+///
+/// Creates or overwrites a custom template. Built-in templates can be overridden
+/// by saving a custom template with the same ID.
+///
+/// # Arguments
+/// * `template_id` - Template identifier (alphanumeric + underscores)
+/// * `template_json` - Full JSON content of the template
+///
+/// # Returns
+/// Ok(template_name) if saved successfully, Err(error_message) if invalid
+#[tauri::command]
+pub async fn api_save_template<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    template_id: String,
+    template_json: String,
+) -> Result<String, String> {
+    info!("api_save_template called for template_id: {}", template_id);
+
+    // Validate the ID format
+    if template_id.is_empty() {
+        return Err("Template ID cannot be empty".to_string());
+    }
+    if !template_id.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
+        return Err("Template ID must contain only alphanumeric characters, underscores, and hyphens".to_string());
+    }
+
+    // Validate and parse the template
+    let template = templates::validate_and_parse_template(&template_json)?;
+
+    // Save to custom templates directory
+    templates::save_custom_template(&template_id, &template_json)?;
+
+    info!("Template '{}' saved successfully as '{}'", template.name, template_id);
+    Ok(template.name)
+}
+
+/// Deletes a custom template from the user's templates directory
+///
+/// Built-in templates cannot be deleted.
+///
+/// # Arguments
+/// * `template_id` - Template identifier to delete
+///
+/// # Returns
+/// Ok(()) if deleted successfully, Err(error_message) if not found or is built-in
+#[tauri::command]
+pub async fn api_delete_template<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    template_id: String,
+) -> Result<(), String> {
+    info!("api_delete_template called for template_id: {}", template_id);
+
+    templates::delete_custom_template(&template_id)?;
+
+    info!("Template '{}' deleted successfully", template_id);
+    Ok(())
+}
+
+/// Gets the raw JSON content of a template for editing
+///
+/// # Arguments
+/// * `template_id` - Template identifier
+///
+/// # Returns
+/// Raw JSON string of the template, along with whether it's built-in
+#[tauri::command]
+pub async fn api_get_template_json<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    template_id: String,
+) -> Result<TemplateJsonResponse, String> {
+    info!("api_get_template_json called for template_id: {}", template_id);
+
+    let json = templates::get_template_json(&template_id)?;
+    let is_builtin = templates::is_builtin_template(&template_id);
+
+    Ok(TemplateJsonResponse {
+        json,
+        is_builtin,
+    })
+}
+
+/// Response for api_get_template_json
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TemplateJsonResponse {
+    pub json: String,
+    pub is_builtin: bool,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
